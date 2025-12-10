@@ -63,6 +63,17 @@
             max-width: 100vw;
             overflow-x: hidden;
             position: relative;
+            opacity: 0;
+            animation: fadeInBody 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeInBody {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
 
         body::before {
@@ -121,6 +132,18 @@
             margin: 0 auto;
             min-height: 100vh;
             position: relative;
+            animation: slideUpContainer 0.6s ease-out 0.2s both;
+        }
+
+        @keyframes slideUpContainer {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* ANIMATIONS */
@@ -129,7 +152,6 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -141,7 +163,6 @@
                 opacity: 0;
                 transform: translateY(-20px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -152,7 +173,6 @@
             from {
                 opacity: 0;
             }
-
             to {
                 opacity: 1;
             }
@@ -163,7 +183,6 @@
                 opacity: 0;
                 transform: scale(0.9);
             }
-
             to {
                 opacity: 1;
                 transform: scale(1);
@@ -171,24 +190,18 @@
         }
 
         @keyframes pulse {
-
-            0%,
-            100% {
+            0%, 100% {
                 opacity: 1;
             }
-
             50% {
                 opacity: 0.7;
             }
         }
 
         @keyframes float {
-
-            0%,
-            100% {
+            0%, 100% {
                 transform: translateY(0);
             }
-
             50% {
                 transform: translateY(-5px);
             }
@@ -324,7 +337,7 @@
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            animation: slideDown 0.3s ease-out;
+            animation: slideDown 0.3s ease-out 0.4s both;
         }
 
         /* УБРАЛИ логотип и кнопки в шапке */
@@ -434,6 +447,7 @@
             padding: 16px 16px 20px;
             margin: 0;
             scrollbar-width: none;
+            animation: slideUp 0.5s ease-out 0.3s both;
         }
 
         .quick-actions::-webkit-scrollbar {
@@ -486,6 +500,7 @@
             padding: 8px 16px 20px;
             scrollbar-width: none;
             margin-bottom: 8px;
+            animation: slideUp 0.5s ease-out 0.4s both;
         }
 
         .categories::-webkit-scrollbar {
@@ -525,7 +540,7 @@
             overflow: hidden;
             position: relative;
             box-shadow: var(--shadow-lg);
-            animation: slideUp 0.6s ease-out;
+            animation: slideUp 0.6s ease-out 0.5s both;
         }
 
         .banner-content {
@@ -569,6 +584,7 @@
         .products-section {
             padding: 0px 16px 20px;
             padding-bottom: 80px;
+            animation: slideUp 0.6s ease-out 0.6s both;
         }
 
         .section-header {
@@ -627,6 +643,7 @@
             cursor: pointer;
             display: flex;
             flex-direction: column;
+            animation: fadeIn 0.5s ease-out;
         }
 
         .product-card:hover {
@@ -636,11 +653,11 @@
         }
 
         .product-card:nth-child(odd) {
-            animation-delay: 0.1s;
+            animation-delay: 0.7s;
         }
 
         .product-card:nth-child(even) {
-            animation-delay: 0.2s;
+            animation-delay: 0.8s;
         }
 
         .product-badges {
@@ -842,6 +859,7 @@
             z-index: 1000;
             max-width: 500px;
             margin: 0 auto;
+            animation: slideUp 0.5s ease-out 0.9s both;
         }
 
         .nav-items {
@@ -1834,13 +1852,13 @@
             <button class="category-btn" data-category="sunscreen">Солнцезащита</button>
         </div>
 
-        <!-- Banner -->
+        <!-- Banner с измененной кнопкой -->
         <div class="banner">
             <div class="banner-content">
                 <h2><i class="fas fa-crown"></i> Премиум косметика</h2>
                 <p>Скидка 25% на первую покупку. Подбор по типу кожи с бесплатной консультацией.</p>
-                <button class="btn btn-accent" onclick="showFilters()">
-                    <i class="fas fa-magic"></i> Подобрать средство
+                <button class="btn btn-accent" onclick="window.location.href='app-review.html'">
+                    <i class="fas fa-comment-alt"></i> Оставить отзыв о приложении
                 </button>
             </div>
         </div>
@@ -2050,6 +2068,7 @@
         </div>
 
         <div class="detail-actions">
+            <!-- Кнопка "Купить сейчас" с перенаправлением на страницу оформления -->
             <button class="btn btn-accent" onclick="buyNow()" style="flex: 2;">
                 <i class="fas fa-bolt"></i> Купить сейчас
             </button>
@@ -2146,7 +2165,7 @@
         let currentProduct = null;
         let products = [];
         let filteredProducts = [];
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let cart = [];
         let userFavorites = [];
         let activeFilters = {
             category: 'all',
@@ -2191,13 +2210,112 @@
                     console.log('Пользователь авторизован:', user.uid);
                     loadUserFavorites();
                     loadProducts();
+                    loadCart();
                 } else {
                     currentUser = null;
                     userFavorites = [];
+                    cart = [];
                     console.log('Пользователь не авторизован');
                     loadProducts();
+                    renderCartBadge();
                 }
             });
+        }
+
+        // Загрузка корзины
+        function loadCart() {
+            if (!currentUser) {
+                cart = [];
+                renderCartBadge();
+                return;
+            }
+
+            database.ref('carts/' + currentUser.uid).once('value')
+                .then((snapshot) => {
+                    cart = [];
+                    if (snapshot.exists()) {
+                        const cartData = snapshot.val();
+                        Object.keys(cartData).forEach((key) => {
+                            const item = cartData[key];
+                            if (item && item.id) {
+                                cart.push(item);
+                            }
+                        });
+                    }
+                    renderCartBadge();
+                    console.log('Загружена корзина:', cart);
+                })
+                .catch((error) => {
+                    console.error('Ошибка загрузки корзины:', error);
+                    cart = [];
+                    renderCartBadge();
+                });
+        }
+
+        // Обновление значка корзины
+        function renderCartBadge() {
+            const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+            const badge = document.getElementById('cartTabBadge');
+            
+            if (badge) {
+                badge.textContent = totalItems;
+                if (totalItems > 0) {
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+
+        // Добавление товара в корзину
+        function addToCart(productId) {
+            if (!currentUser) {
+                showToast('Войдите в систему, чтобы добавлять товары в корзину', 'error');
+                setTimeout(() => {
+                    window.location.href = 'profile.html';
+                }, 1500);
+                return false;
+            }
+
+            const product = products.find(p => p.id === productId);
+            if (!product) return false;
+
+            const existingIndex = cart.findIndex(item => item.id === productId);
+
+            if (existingIndex > -1) {
+                cart[existingIndex].quantity = (cart[existingIndex].quantity || 1) + 1;
+            } else {
+                cart.push({
+                    ...product,
+                    quantity: 1
+                });
+            }
+
+            // Сохраняем в Firebase
+            saveCartToFirebase();
+            
+            renderCartBadge();
+            showToast('Товар добавлен в корзину', 'success');
+            return true;
+        }
+
+        // Сохранение корзины в Firebase
+        function saveCartToFirebase() {
+            if (!currentUser) return;
+
+            const cartRef = database.ref('carts/' + currentUser.uid);
+            const cartObject = {};
+            
+            cart.forEach((item, index) => {
+                if (item && item.id) {
+                    cartObject[index] = item;
+                }
+            });
+
+            cartRef.set(cartObject)
+                .catch((error) => {
+                    console.error('Ошибка сохранения корзины:', error);
+                });
         }
 
         // Загрузка избранного пользователя
@@ -2405,6 +2523,9 @@
         function openReviewModal() {
             if (!currentUser) {
                 showToast('Войдите в систему, чтобы оставить отзыв', 'error');
+                setTimeout(() => {
+                    window.location.href = 'profile.html';
+                }, 1500);
                 return;
             }
             
@@ -2413,30 +2534,85 @@
                 return;
             }
             
-            // Check if user already left a review
-            const userReview = productReviews.find(review => review.userId === currentUser.uid);
-            if (userReview) {
-                showToast('Вы уже оставили отзыв на этот товар', 'info');
-                return;
-            }
-            
-            // Reset form
-            selectedRating = 0;
-            document.getElementById('reviewText').value = '';
-            document.getElementById('charCount').textContent = '0';
-            document.getElementById('reviewError').classList.remove('show');
-            
-            // Reset stars
-            const stars = document.querySelectorAll('.star-btn');
-            stars.forEach(star => {
-                star.innerHTML = '<i class="far fa-star"></i>';
-                star.classList.remove('active');
+            // Проверяем, оформил ли пользователь этот товар
+            checkIfUserPurchasedProduct()
+                .then((hasPurchased) => {
+                    if (!hasPurchased) {
+                        showToast('Вы можете оставить отзыв только на товары, которые вы приобрели', 'warning');
+                        return;
+                    }
+                    
+                    // Check if user already left a review
+                    const userReview = productReviews.find(review => review.userId === currentUser.uid);
+                    if (userReview) {
+                        showToast('Вы уже оставили отзыв на этот товар', 'info');
+                        return;
+                    }
+                    
+                    // Reset form
+                    selectedRating = 0;
+                    document.getElementById('reviewText').value = '';
+                    document.getElementById('charCount').textContent = '0';
+                    document.getElementById('reviewError').classList.remove('show');
+                    
+                    // Reset stars
+                    const stars = document.querySelectorAll('.star-btn');
+                    stars.forEach(star => {
+                        star.innerHTML = '<i class="far fa-star"></i>';
+                        star.classList.remove('active');
+                    });
+                    
+                    document.getElementById('selectedRatingText').textContent = 'Нажмите на звезду, чтобы оценить';
+                    
+                    // Show modal
+                    document.getElementById('reviewModal').classList.add('active');
+                })
+                .catch((error) => {
+                    console.error('Ошибка проверки покупки:', error);
+                    showToast('Ошибка проверки возможности оставить отзыв', 'error');
+                });
+        }
+
+        // Проверка, купил ли пользователь товар
+        function checkIfUserPurchasedProduct() {
+            return new Promise((resolve, reject) => {
+                if (!currentUser || !currentProduct) {
+                    resolve(false);
+                    return;
+                }
+
+                database.ref('orders/' + currentUser.uid).once('value')
+                    .then((snapshot) => {
+                        if (!snapshot.exists()) {
+                            resolve(false);
+                            return;
+                        }
+
+                        const orders = snapshot.val();
+                        let hasPurchased = false;
+
+                        Object.keys(orders).forEach((orderId) => {
+                            const order = orders[orderId];
+                            if (order && order.items) {
+                                // Проверяем, есть ли текущий товар в заказах со статусом 'paid' или 'completed'
+                                const itemInOrder = order.items.find(item => 
+                                    item.id === currentProduct.id && 
+                                    (order.status === 'paid' || order.status === 'completed' || order.status === 'delivered')
+                                );
+                                
+                                if (itemInOrder) {
+                                    hasPurchased = true;
+                                }
+                            }
+                        });
+
+                        resolve(hasPurchased);
+                    })
+                    .catch((error) => {
+                        console.error('Ошибка проверки заказов:', error);
+                        reject(error);
+                    });
             });
-            
-            document.getElementById('selectedRatingText').textContent = 'Нажмите на звезду, чтобы оценить';
-            
-            // Show modal
-            document.getElementById('reviewModal').classList.add('active');
         }
 
         // Close review modal
@@ -2780,7 +2956,10 @@
             event.stopPropagation();
 
             if (!currentUser) {
-                showToast('Войдите в систему, чтобы добавлять товары в избранное');
+                showToast('Войдите в систему, чтобы добавлять товары в избранное', 'error');
+                setTimeout(() => {
+                    window.location.href = 'profile.html';
+                }, 1500);
                 return;
             }
 
@@ -3083,7 +3262,7 @@
                                 ${product.oldPrice ? `<span class="old-price">${formatPrice(product.oldPrice)} ₽</span>` : ''}
                             </div>
                             <button class="add-to-cart ${inCart ? 'added' : ''}" 
-                                    onclick="toggleCart(event, '${product.id}')">
+                                    onclick="addToCartFromProductCard(event, '${product.id}')">
                                 <i class="fas fa-shopping-cart"></i>
                                 ${inCart ? 'В корзине' : 'В корзину'}
                             </button>
@@ -3091,6 +3270,28 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // Добавление в корзину из карточки товара
+        function addToCartFromProductCard(event, productId) {
+            event.stopPropagation();
+            
+            if (!currentUser) {
+                showToast('Войдите в систему, чтобы добавлять товары в корзину', 'error');
+                setTimeout(() => {
+                    window.location.href = 'profile.html';
+                }, 1500);
+                return;
+            }
+            
+            const added = addToCart(productId);
+            if (added) {
+                const btn = event.target.closest('.add-to-cart');
+                if (btn) {
+                    btn.classList.add('added');
+                    btn.innerHTML = '<i class="fas fa-shopping-cart"></i> В корзине';
+                }
+            }
         }
 
         // Helper functions
@@ -3250,67 +3451,34 @@
             showToast('Фильтры сброшены', 'info');
         }
 
-        // Toggle cart
-        function toggleCart(event, productId) {
-            event.stopPropagation();
-
-            const product = products.find(p => p.id === productId);
-            if (!product) return;
-
-            const existingIndex = cart.findIndex(item => item.id === productId);
-            const btn = event.target.closest('.add-to-cart');
-
-            if (existingIndex === -1) {
-                cart.push({
-                    ...product,
-                    quantity: 1
-                });
-                localStorage.setItem('cart', JSON.stringify(cart));
-                updateCartBadge();
-
-                if (btn) {
-                    btn.classList.add('added');
-                    btn.innerHTML = '<i class="fas fa-shopping-cart"></i> В корзине';
-                }
-
-                showToast('Товар добавлен в корзину', 'success');
-            } else {
-                cart.splice(existingIndex, 1);
-                localStorage.setItem('cart', JSON.stringify(cart));
-                updateCartBadge();
-
-                if (btn) {
-                    btn.classList.remove('added');
-                    btn.innerHTML = '<i class="fas fa-shopping-cart"></i> В корзину';
-                }
-
-                showToast('Товар удален из корзины', 'info');
-            }
-        }
-
         // Toggle cart from detail
         function toggleCartFromDetail() {
             if (!currentProduct) return;
+
+            if (!currentUser) {
+                showToast('Войдите в систему, чтобы добавлять товары в корзину', 'error');
+                setTimeout(() => {
+                    window.location.href = 'profile.html';
+                }, 1500);
+                return;
+            }
 
             const existingIndex = cart.findIndex(item => item.id === currentProduct.id);
             const cartBtn = document.getElementById('detailCartBtn');
 
             if (existingIndex === -1) {
-                cart.push({
-                    ...currentProduct,
-                    quantity: 1
-                });
-                localStorage.setItem('cart', JSON.stringify(cart));
-                updateCartBadge();
-
+                // Добавляем товар в корзину
+                addToCart(currentProduct.id);
+                
                 cartBtn.innerHTML = '<i class="fas fa-check"></i>';
                 cartBtn.classList.add('added');
 
                 showToast('Товар добавлен в корзину', 'success');
             } else {
+                // Удаляем товар из корзины
                 cart.splice(existingIndex, 1);
-                localStorage.setItem('cart', JSON.stringify(cart));
-                updateCartBadge();
+                saveCartToFirebase();
+                renderCartBadge();
 
                 cartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i>';
                 cartBtn.classList.remove('added');
@@ -3449,37 +3617,40 @@
             slider.style.transform = `translateX(-${index * 100}%)`;
         }
 
-        // Buy now
+        // Buy now - перекидывает на страницу оформления с конкретным товаром
         function buyNow() {
             if (!currentProduct) return;
 
+            if (!currentUser) {
+                showToast('Войдите в систему, чтобы оформить заказ', 'error');
+                setTimeout(() => {
+                    window.location.href = 'profile.html';
+                }, 1500);
+                return;
+            }
+
+            // Добавляем товар в корзину
             const existingIndex = cart.findIndex(item => item.id === currentProduct.id);
             if (existingIndex === -1) {
                 cart.push({
                     ...currentProduct,
                     quantity: 1
                 });
-                localStorage.setItem('cart', JSON.stringify(cart));
-                updateCartBadge();
+                saveCartToFirebase();
             }
 
+            // Сохраняем ID текущего товара для страницы оформления
+            localStorage.setItem('checkout_product_id', currentProduct.id);
+            
+            // Перенаправляем на страницу оформления
             setTimeout(() => {
-                window.location.href = 'cart.html';
+                window.location.href = 'checkout.html?product=' + currentProduct.id;
             }, 500);
         }
 
         // Update cart badge
         function updateCartBadge() {
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            const badge = document.getElementById('cartTabBadge');
-
-            badge.textContent = totalItems;
-
-            if (totalItems > 0) {
-                badge.style.display = 'flex';
-            } else {
-                badge.style.display = 'none';
-            }
+            renderCartBadge();
         }
 
         // Update favorites badge

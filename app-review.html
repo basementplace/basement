@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Basement | Отзывы о приложении</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --ozon-blue: #005BFF;
+            --ozon-blue-dark: #004ECC;
+            --ozon-gray-10: #1A1A1A;
+            --ozon-gray-20: #2C2C2E;
+            --ozon-gray-30: #3C3C3E;
+            --ozon-gray-40: #48484A;
+            --ozon-gray-50: #8E8E93;
+            --ozon-white: #FFFFFF;
+            --glass-bg: rgba(44, 44, 46, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --success-green: #34C759;
+            --error-red: #FF3B30;
+            --warning-yellow: #FF9500;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
+            color: var(--ozon-white);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            position: relative;
+            opacity: 0;
+            animation: fadeInBody 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeInBody {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(0, 91, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 153, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 0 16px 120px;
+            animation: slideUpContainer 0.6s ease-out 0.2s both;
+        }
+
+        @keyframes slideUpContainer {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            padding: 20px 0 16px;
+            margin-bottom: 4px;
+            animation: slideDown 0.3s ease-out 0.4s both;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 10px;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            color: var(--ozon-white);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 12px 16px;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(44, 44, 46, 0.9);
+            border-color: var(--ozon-blue);
+            transform: translateY(-2px);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .review-form-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            animation: fadeIn 0.5s ease-out 0.5s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .form-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .rating-section {
+            margin-bottom: 20px;
+        }
+
+        .rating-label {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .stars-input {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .star-btn {
+            background: none;
+            border: none;
+            font-size: 32px;
+            color: var(--ozon-gray-30);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0;
+        }
+
+        .star-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .star-btn.active {
+            color: var(--warning-yellow);
+        }
+
+        .selected-rating-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--ozon-gray-50);
+            margin-bottom: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .review-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            background: var(--ozon-gray-30);
+            border: 1px solid var(--ozon-gray-40);
+            border-radius: 12px;
+            color: var(--ozon-white);
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            resize: vertical;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .review-textarea:focus {
+            border-color: var(--ozon-blue);
+            box-shadow: 0 0 0 2px rgba(0, 91, 255, 0.2);
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 12px;
+            color: var(--ozon-gray-50);
+            margin-top: 4px;
+        }
+
+        .error-message {
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid var(--error-red);
+            color: var(--error-red);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            text-align: center;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(52, 199, 89, 0.1);
+            border: 1px solid var(--success-green);
+            color: var(--success-green);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            text-align: center;
+            display: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--ozon-blue);
+            border: none;
+            border-radius: 12px;
+            color: var(--ozon-white);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .submit-btn:hover {
+            background: var(--ozon-blue-dark);
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            background: var(--ozon-gray-30);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .reviews-section {
+            animation: fadeIn 0.5s ease-out 0.6s both;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .reviews-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .review-item {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px;
+        }
+
+        .review-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .review-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--ozon-blue), var(--ozon-blue-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ozon-white);
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .review-user {
+            flex: 1;
+        }
+
+        .review-user-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .review-date {
+            font-size: 12px;
+            color: var(--ozon-gray-50);
+        }
+
+        .review-rating {
+            color: var(--warning-yellow);
+            font-size: 14px;
+        }
+
+        .review-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--ozon-gray-70);
+            margin-bottom: 12px;
+        }
+
+        .no-reviews {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--ozon-gray-50);
+        }
+
+        .no-reviews i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .average-rating {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: var(--glass-bg);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .average-rating-value {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--ozon-white);
+            line-height: 1;
+        }
+
+        .average-rating-details {
+            flex: 1;
+        }
+
+        .average-rating-stars {
+            font-size: 20px;
+            color: var(--warning-yellow);
+            margin-bottom: 8px;
+        }
+
+        .average-rating-text {
+            font-size: 14px;
+            color: var(--ozon-gray-50);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--ozon-gray-50);
+        }
+
+        .loading i {
+            font-size: 32px;
+            margin-bottom: 16px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .auth-message {
+            background: rgba(0, 91, 255, 0.1);
+            border: 1px solid var(--ozon-blue);
+            color: var(--ozon-white);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .auth-btn {
+            background: var(--ozon-blue);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auth-btn:hover {
+            background: var(--ozon-blue-dark);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 12px 120px;
+            }
+            
+            .average-rating {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .average-rating-value {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <a class="back-btn" href="index.html">
+                    <i class="fas fa-arrow-left"></i> Назад
+                </a>
+            </div>
+            <h1 class="page-title">
+                <i class="fas fa-comment-alt" style="color: var(--ozon-blue);"></i> Отзывы о приложении
+            </h1>
+        </div>
+
+        <div id="authMessage" class="auth-message" style="display: none;">
+            <i class="fas fa-user-circle"></i>
+            <h3>Войдите в аккаунт</h3>
+            <p>Для оставления отзыва необходимо войти в аккаунт</p>
+            <button class="auth-btn" onclick="window.location.href='profile.html'">
+                <i class="fas fa-sign-in-alt"></i> Войти в аккаунт
+            </button>
+        </div>
+
+        <div id="reviewFormSection" style="display: none;">
+            <div class="review-form-section">
+                <h2 class="form-title">
+                    <i class="fas fa-star"></i> Оставить отзыв
+                </h2>
+                
+                <div class="error-message" id="errorMessage">
+                    <i class="fas fa-exclamation-circle"></i> <span id="errorText"></span>
+                </div>
+
+                <div class="success-message" id="successMessage">
+                    <i class="fas fa-check-circle"></i> <span id="successText"></span>
+                </div>
+
+                <div class="rating-section">
+                    <label class="rating-label">Ваша оценка:</label>
+                    <div class="stars-input">
+                        <button class="star-btn" data-rating="1">
+                            <i class="far fa-star"></i>
+                        </button>
+                        <button class="star-btn" data-rating="2">
+                            <i class="far fa-star"></i>
+                        </button>
+                        <button class="star-btn" data-rating="3">
+                            <i class="far fa-star"></i>
+                        </button>
+                        <button class="star-btn" data-rating="4">
+                            <i class="far fa-star"></i>
+                        </button>
+                        <button class="star-btn" data-rating="5">
+                            <i class="far fa-star"></i>
+                        </button>
+                    </div>
+                    <div class="selected-rating-text" id="selectedRatingText">
+                        Нажмите на звезду, чтобы оценить
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="reviewText" class="form-label">Ваш отзыв:</label>
+                    <textarea 
+                        class="review-textarea" 
+                        id="reviewText" 
+                        placeholder="Поделитесь своим мнением о приложении..."
+                        maxlength="1000"
+                    ></textarea>
+                    <div class="char-counter">
+                        <span id="charCount">0</span>/1000 символов
+                    </div>
+                </div>
+
+                <button class="submit-btn" onclick="submitAppReview()" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i> Опубликовать отзыв
+                </button>
+            </div>
+        </div>
+
+        <div class="reviews-section">
+            <div class="average-rating" id="averageRating">
+                <div class="average-rating-value">0.0</div>
+                <div class="average-rating-details">
+                    <div class="average-rating-stars" id="averageRatingStars">★★★★★</div>
+                    <div class="average-rating-text" id="averageRatingText">0 отзывов</div>
+                </div>
+            </div>
+
+            <h2 class="section-title">
+                <i class="fas fa-comments"></i> Последние отзывы
+            </h2>
+
+            <div id="loadingReviews" class="loading">
+                <i class="fas fa-spinner"></i>
+                <p>Загрузка отзывов...</p>
+            </div>
+
+            <div class="reviews-list" id="reviewsList">
+                <!-- Отзывы будут загружены динамически -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_XhDZ9rUv7wFlQkHMFwvkA5muZY4T-5I",
+            authDomain: "estels-86a9c.firebaseapp.com",
+            databaseURL: "https://estels-86a9c-default-rtdb.firebaseio.com",
+            projectId: "estels-86a9c",
+            storageBucket: "estels-86a9c.firebasestorage.app",
+            messagingSenderId: "886795277090",
+            appId: "1:886795277090:web:0e7cff9111d69e8b828b7b",
+            measurementId: "G-FCH1Y0WX17"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        let currentUser = null;
+        let selectedRating = 0;
+        let appReviews = [];
+        let appReviewStats = null;
+        let userHasReviewed = false;
+
+        // Список нецензурных слов (можно расширить)
+        const profanityFilter = [
+            'хуй', 'пизда', 'ебал', 'ебать', 'блядь', 'блять', 'сука', 'гандон',
+            'мудак', 'пидор', 'говно', 'дрочить', 'выеб', 'заеб', 'оху', 'аху',
+            'пизд', 'бля', 'хуя', 'хуе', 'хуё', 'ебу', 'ебё', 'ебь'
+        ];
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Проверяем авторизацию
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    currentUser = user;
+                    checkIfUserHasReviewed();
+                    document.getElementById('authMessage').style.display = 'none';
+                    document.getElementById('reviewFormSection').style.display = 'block';
+                } else {
+                    currentUser = null;
+                    document.getElementById('authMessage').style.display = 'block';
+                    document.getElementById('reviewFormSection').style.display = 'none';
+                }
+                loadAppReviews();
+            });
+
+            // Инициализация формы
+            initForm();
+        });
+
+        function initForm() {
+            // Инициализация звезд рейтинга
+            document.querySelectorAll('.star-btn').forEach(star => {
+                star.addEventListener('click', function () {
+                    const rating = parseInt(this.dataset.rating);
+                    selectRating(rating);
+                });
+            });
+
+            // Счетчик символов
+            const reviewText = document.getElementById('reviewText');
+            const charCount = document.getElementById('charCount');
+            
+            reviewText.addEventListener('input', function () {
+                charCount.textContent = this.value.length;
+            });
+
+            // Проверка на нецензурную лексику
+            reviewText.addEventListener('input', function () {
+                checkForProfanity(this.value);
+            });
+        }
+
+        function selectRating(rating) {
+            selectedRating = rating;
+            const stars = document.querySelectorAll('.star-btn');
+            stars.forEach(star => {
+                const starRating = parseInt(star.dataset.rating);
+                if (starRating <= rating) {
+                    star.innerHTML = '<i class="fas fa-star"></i>';
+                    star.classList.add('active');
+                } else {
+                    star.innerHTML = '<i class="far fa-star"></i>';
+                    star.classList.remove('active');
+                }
+            });
+            
+            const ratingTexts = [
+                'Ужасно',
+                'Плохо',
+                'Нормально',
+                'Хорошо',
+                'Отлично'
+            ];
+            document.getElementById('selectedRatingText').textContent = ratingTexts[rating - 1];
+        }
+
+        function checkForProfanity(text) {
+            const lowerText = text.toLowerCase();
+            let hasProfanity = false;
+            
+            profanityFilter.forEach(word => {
+                if (lowerText.includes(word)) {
+                    hasProfanity = true;
+                }
+            });
+            
+            if (hasProfanity) {
+                showError('Пожалуйста, не используйте нецензурную лексику в отзыве');
+                return true;
+            }
+            
+            return false;
+        }
+
+        function checkIfUserHasReviewed() {
+            if (!currentUser) return;
+
+            database.ref('appReviews').orderByChild('userId').equalTo(currentUser.uid).once('value')
+                .then((snapshot) => {
+                    userHasReviewed = snapshot.exists();
+                    if (userHasReviewed) {
+                        document.getElementById('submitBtn').disabled = true;
+                        document.getElementById('submitBtn').innerHTML = 
+                            '<i class="fas fa-check"></i> Вы уже оставили отзыв';
+                    }
+                })
+                .catch((error) => {
+                    console.error('Ошибка проверки отзыва:', error);
+                });
+        }
+
+        function submitAppReview() {
+            if (!currentUser) {
+                showError('Войдите в систему, чтобы оставить отзыв');
+                return;
+            }
+
+            if (userHasReviewed) {
+                showError('Вы уже оставляли отзыв о приложении');
+                return;
+            }
+
+            if (selectedRating === 0) {
+                showError('Пожалуйста, выберите оценку');
+                return;
+            }
+
+            const reviewText = document.getElementById('reviewText').value.trim();
+            if (reviewText.length < 10) {
+                showError('Отзыв должен содержать минимум 10 символов');
+                return;
+            }
+
+            if (reviewText.length > 1000) {
+                showError('Отзыв не должен превышать 1000 символов');
+                return;
+            }
+
+            // Проверка на нецензурную лексику
+            if (checkForProfanity(reviewText)) {
+                return;
+            }
+
+            // Показываем загрузку
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+            submitBtn.disabled = true;
+
+            // Создаем отзыв
+            const review = {
+                userId: currentUser.uid,
+                userName: currentUser.displayName || currentUser.email.split('@')[0],
+                userAvatar: currentUser.photoURL || null,
+                rating: selectedRating,
+                text: reviewText,
+                createdAt: Date.now(),
+                updatedAt: Date.now()
+            };
+
+            // Сохраняем отзыв в Firebase
+            const newReviewRef = database.ref('appReviews').push();
+            newReviewRef.set(review)
+                .then(() => {
+                    // Сбрасываем форму
+                    selectedRating = 0;
+                    document.getElementById('reviewText').value = '';
+                    document.getElementById('charCount').textContent = '0';
+                    
+                    // Сбрасываем звезды
+                    document.querySelectorAll('.star-btn').forEach(star => {
+                        star.innerHTML = '<i class="far fa-star"></i>';
+                        star.classList.remove('active');
+                    });
+                    
+                    document.getElementById('selectedRatingText').textContent = 'Нажмите на звезду, чтобы оценить';
+                    
+                    // Показываем успешное сообщение
+                    showSuccess('Ваш отзыв успешно опубликован!');
+                    
+                    // Обновляем отзывы
+                    loadAppReviews();
+                    
+                    // Блокируем кнопку, так как пользователь уже оставил отзыв
+                    userHasReviewed = true;
+                    submitBtn.innerHTML = '<i class="fas fa-check"></i> Вы уже оставили отзыв';
+                    submitBtn.disabled = true;
+                })
+                .catch((error) => {
+                    console.error('Ошибка сохранения отзыва:', error);
+                    showError('Произошла ошибка при сохранении отзыва');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+        }
+
+        function loadAppReviews() {
+            database.ref('appReviews').orderByChild('createdAt').limitToLast(50).once('value')
+                .then((snapshot) => {
+                    appReviews = [];
+                    if (snapshot.exists()) {
+                        snapshot.forEach((childSnapshot) => {
+                            const review = childSnapshot.val();
+                            review.id = childSnapshot.key;
+                            appReviews.unshift(review); // Добавляем в начало для сортировки по дате
+                        });
+                    }
+                    
+                    calculateAppReviewStats();
+                    updateAppReviewsDisplay();
+                    document.getElementById('loadingReviews').style.display = 'none';
+                })
+                .catch((error) => {
+                    console.error('Ошибка загрузки отзывов:', error);
+                    document.getElementById('loadingReviews').style.display = 'none';
+                });
+        }
+
+        function calculateAppReviewStats() {
+            if (appReviews.length === 0) {
+                appReviewStats = {
+                    averageRating: 0,
+                    totalReviews: 0
+                };
+                return;
+            }
+            
+            const totalRating = appReviews.reduce((sum, review) => sum + review.rating, 0);
+            const averageRating = totalRating / appReviews.length;
+            
+            appReviewStats = {
+                averageRating: averageRating,
+                totalReviews: appReviews.length
+            };
+        }
+
+        function updateAppReviewsDisplay() {
+            const averageRatingValue = document.getElementById('averageRatingValue');
+            const averageRatingStars = document.getElementById('averageRatingStars');
+            const averageRatingText = document.getElementById('averageRatingText');
+            const reviewsList = document.getElementById('reviewsList');
+            
+            if (appReviewStats) {
+                averageRatingValue.textContent = appReviewStats.averageRating.toFixed(1);
+                averageRatingStars.innerHTML = getStars(appReviewStats.averageRating);
+                averageRatingText.textContent = `${appReviewStats.totalReviews} отзывов`;
+            }
+            
+            if (appReviews.length === 0) {
+                reviewsList.innerHTML = `
+                    <div class="no-reviews">
+                        <i class="fas fa-comment-slash"></i>
+                        <h4>Пока нет отзывов</h4>
+                        <p>Будьте первым, кто оставит отзыв о нашем приложении!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let reviewsHtml = '';
+            appReviews.forEach(review => {
+                const date = formatDate(review.createdAt);
+                let avatarText = 'П';
+                if (review.userName) {
+                    avatarText = review.userName.charAt(0).toUpperCase();
+                }
+                
+                reviewsHtml += `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="review-avatar">
+                                ${avatarText}
+                            </div>
+                            <div class="review-user">
+                                <div class="review-user-name">${review.userName || 'Пользователь'}</div>
+                                <div class="review-date">${date}</div>
+                            </div>
+                            <div class="review-rating">
+                                ${getStars(review.rating)}
+                            </div>
+                        </div>
+                        <div class="review-text">
+                            ${escapeHtml(review.text)}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            reviewsList.innerHTML = reviewsHtml;
+        }
+
+        function getStars(rating) {
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5;
+            let stars = '';
+
+            for (let i = 0; i < 5; i++) {
+                if (i < fullStars) {
+                    stars += '<i class="fas fa-star"></i>';
+                } else if (i === fullStars && halfStar) {
+                    stars += '<i class="fas fa-star-half-alt"></i>';
+                } else {
+                    stars += '<i class="far fa-star"></i>';
+                }
+            }
+            return stars;
+        }
+
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            if (diffMins < 1) return 'Только что';
+            if (diffMins < 60) return `${diffMins} мин. назад`;
+            if (diffHours < 24) return `${diffHours} ч. назад`;
+            if (diffDays === 1) return 'Вчера';
+            if (diffDays < 7) return `${diffDays} дн. назад`;
+            
+            return date.toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+            
+            // Автоскрытие через 5 секунд
+            setTimeout(() => {
+                document.getElementById('errorMessage').style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            document.getElementById('successText').textContent = message;
+            document.getElementById('successMessage').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            // Автоскрытие через 5 секунд
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'none';
+            }, 5000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
