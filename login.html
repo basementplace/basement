@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Basement | Регистрация</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --ozon-blue: #005BFF;
+            --ozon-blue-dark: #004ECC;
+            --ozon-gray-10: #1A1A1A;
+            --ozon-gray-20: #2C2C2E;
+            --ozon-gray-30: #3C3C3E;
+            --ozon-gray-40: #48484A;
+            --ozon-gray-50: #8E8E93;
+            --ozon-white: #FFFFFF;
+            --glass-bg: rgba(44, 44, 46, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --success-green: #34C759;
+            --error-red: #FF3B30;
+            --warning-yellow: #FF9500;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
+            color: var(--ozon-white);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 91, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 153, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .auth-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px 32px;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .back-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            color: var(--ozon-white);
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .back-home:hover {
+            background: rgba(44, 44, 46, 0.9);
+            border-color: var(--ozon-blue);
+            transform: translateY(-2px);
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 42px;
+            color: var(--ozon-blue);
+            margin-bottom: 16px;
+        }
+
+        .logo-text {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--ozon-blue), #00B894);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-subtext {
+            color: var(--ozon-gray-50);
+            font-size: 15px;
+        }
+
+        .auth-tabs {
+            display: none; /* Скрываем вкладки */
+        }
+
+        .auth-form {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--ozon-gray-50);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 18px;
+            background: rgba(60, 60, 62, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--ozon-white);
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--ozon-blue);
+            box-shadow: 0 0 0 2px rgba(0, 91, 255, 0.2);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--ozon-blue);
+            border: none;
+            border-radius: 12px;
+            color: var(--ozon-white);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .auth-btn:hover {
+            background: var(--ozon-blue-dark);
+            transform: translateY(-2px);
+        }
+
+        .auth-btn.secondary {
+            background: var(--ozon-gray-30);
+            margin-top: 16px;
+        }
+
+        .auth-btn.secondary:hover {
+            background: var(--ozon-gray-40);
+        }
+
+        .auth-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .auth-message {
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            border-radius: 12px;
+            padding: 14px 18px;
+            color: #FF3B30;
+            font-size: 14px;
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        .auth-message.success {
+            background: rgba(0, 250, 170, 0.1);
+            border: 1px solid rgba(0, 250, 170, 0.3);
+            color: #00FAAA;
+        }
+
+        .auth-message.warning {
+            background: rgba(255, 149, 0, 0.1);
+            border: 1px solid rgba(255, 149, 0, 0.3);
+            color: var(--warning-yellow);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 32px;
+            color: var(--ozon-gray-50);
+            font-size: 14px;
+        }
+
+        .auth-footer a {
+            color: var(--ozon-blue);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .verification-notice {
+            background: rgba(255, 149, 0, 0.1);
+            border: 1px solid rgba(255, 149, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        .verification-notice i {
+            color: var(--warning-yellow);
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        
+        .verification-notice p {
+            margin: 8px 0;
+            font-size: 14px;
+            color: var(--ozon-gray-50);
+        }
+        
+        .verification-notice strong {
+            color: var(--warning-yellow);
+            font-size: 16px;
+        }
+        
+        .verification-notice .resend-btn {
+            background: var(--ozon-gray-30);
+            border: 1px solid var(--glass-border);
+            margin-top: 12px;
+            padding: 14px;
+        }
+        
+        .verification-notice .resend-btn:hover {
+            background: var(--ozon-gray-40);
+        }
+
+        .resend-timer {
+            margin-top: 8px;
+            font-size: 13px;
+            color: var(--ozon-gray-50);
+        }
+
+        .resend-timer .time {
+            color: var(--warning-yellow);
+            font-weight: 600;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 32px 24px;
+            }
+            
+            .logo-text {
+                font-size: 28px;
+            }
+            
+            .back-home {
+                top: 15px;
+                left: 15px;
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <a href="index.html" class="back-home">
+            <i class="fas fa-arrow-left"></i> На главную
+        </a>
+
+        <div class="logo-container">
+            <div class="logo">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <div class="logo-text">Регистрация</div>
+            <div class="logo-subtext">Создайте новый аккаунт</div>
+        </div>
+
+        <div id="authMessage" class="auth-message"></div>
+
+        <div id="verificationNotice" class="verification-notice">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p><strong>Подтвердите вашу почту!</strong></p>
+            <p id="verificationEmailText"></p>
+            <p>Мы отправили письмо с подтверждением на указанный email.</p>
+            <p>Пожалуйста, проверьте почту и перейдите по ссылке в письме для завершения регистрации.</p>
+            <p>Аккаунт будет создан только после подтверждения почты.</p>
+            <div id="resendTimer" class="resend-timer" style="display: none;">
+                Повторная отправка будет доступна через <span class="time" id="timerCount">60</span> сек.
+            </div>
+        </div>
+
+        <form id="registerForm" class="auth-form" onsubmit="register(event)">
+            <div class="form-group">
+                <label class="form-label">Имя</label>
+                <input type="text" class="form-input" id="registerName" placeholder="Ваше имя" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-input" id="registerEmail" placeholder="your@email.com" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Пароль</label>
+                <input type="password" class="form-input" id="registerPassword" placeholder="••••••••" minlength="6" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Подтвердите пароль</label>
+                <input type="password" class="form-input" id="registerConfirmPassword" placeholder="••••••••" minlength="6" required>
+            </div>
+            <button type="submit" class="auth-btn" id="registerBtn">
+                <span id="registerBtnText">Зарегистрироваться</span>
+                <i class="fas fa-user-plus"></i>
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Уже есть аккаунт? <a href="profile.html">Войти</a></p>
+            <p>Продолжая, вы соглашаетесь с <a href="#">Условиями использования</a> и <a href="#">Политикой конфиденциальности</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Firebase конфигурация
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_XhDZ9rUv7wFlQkHMFwvkA5muZY4T-5I",
+            authDomain: "estels-86a9c.firebaseapp.com",
+            databaseURL: "https://estels-86a9c-default-rtdb.firebaseio.com",
+            projectId: "estels-86a9c",
+            storageBucket: "estels-86a9c.firebasestorage.app",
+            messagingSenderId: "886795277090",
+            appId: "1:886795277090:web:0e7cff9111d69e8b828b7b",
+            measurementId: "G-FCH1Y0WX17"
+        };
+
+        // Инициализация Firebase
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log("Firebase инициализирован");
+        } catch (error) {
+            console.error("Ошибка инициализации Firebase:", error);
+        }
+
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // Переменные для управления регистрацией
+        let pendingRegistrationData = null;
+        let emailVerificationTimer = null;
+        let resendTimerInterval = null;
+        let resendAttempts = 0;
+        let canResend = true;
+
+        // Наблюдатель за состоянием аутентификации
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                console.log("Пользователь найден:", user.email, "Email verified:", user.emailVerified);
+                
+                // Если пользователь подтвердил email, создаем аккаунт в базе данных
+                if (user.emailVerified && pendingRegistrationData) {
+                    completeRegistration(user);
+                } else if (!user.emailVerified && pendingRegistrationData) {
+                    // Пользователь не подтвердил email, показываем уведомление
+                    showVerificationNotice(pendingRegistrationData.email);
+                } else if (user.emailVerified) {
+                    // Если пользователь уже зарегистрирован и подтвердил email, редирект на профиль
+                    window.location.href = 'profile.html';
+                }
+            } else {
+                console.log("Пользователь не авторизован");
+            }
+        });
+
+        // Функция регистрации с обязательным подтверждением email
+        function register(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            
+            // Валидация
+            if (password !== confirmPassword) {
+                showMessage('Пароли не совпадают', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage('Пароль должен быть не менее 6 символов', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('registerBtn');
+            const btnText = document.getElementById('registerBtnText');
+            const originalText = btnText.textContent;
+            
+            btnText.textContent = 'Регистрация...';
+            btn.disabled = true;
+            
+            clearMessage();
+            
+            // Сбрасываем счетчик попыток при новой регистрации
+            resendAttempts = 0;
+            
+            // Шаг 1: Создаем временного пользователя в Firebase Auth
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    console.log("Временный пользователь создан:", user.uid);
+                    
+                    // Сохраняем данные для завершения регистрации после подтверждения email
+                    pendingRegistrationData = {
+                        name: name,
+                        email: email,
+                        password: password,
+                        userId: user.uid
+                    };
+                    
+                    // Обновляем displayName
+                    return user.updateProfile({
+                        displayName: name
+                    });
+                })
+                .then(() => {
+                    const user = auth.currentUser;
+                    
+                    // Шаг 2: Отправляем письмо с подтверждением
+                    return user.sendEmailVerification();
+                })
+                .then(() => {
+                    console.log("Письмо с подтверждением отправлено");
+                    resendAttempts = 1; // Первая отправка
+                    
+                    // Шаг 3: Сохраняем данные о незавершенной регистрации в базу
+                    const registrationData = {
+                        name: pendingRegistrationData.name,
+                        email: pendingRegistrationData.email,
+                        createdAt: Date.now(),
+                        status: 'pending_verification',
+                        resendAttempts: 1
+                    };
+                    
+                    return database.ref(`pending_users/${pendingRegistrationData.userId}`).set(registrationData);
+                })
+                .then(() => {
+                    // Шаг 4: Показываем уведомление о подтверждении email
+                    showVerificationNotice(pendingRegistrationData.email);
+                    
+                    // Шаг 5: Выходим из системы
+                    return auth.signOut();
+                })
+                .then(() => {
+                    console.log("Пользователь вышел, ожидается подтверждение email");
+                    showMessage('Регистрация начата! Проверьте вашу почту для подтверждения email.', 'success');
+                    
+                    // Очищаем форму регистрации
+                    document.getElementById('registerForm').reset();
+                    
+                    // Запускаем проверку подтверждения email
+                    startEmailVerificationCheck();
+                })
+                .catch((error) => {
+                    console.error("Ошибка регистрации:", error);
+                    let errorMessage = 'Ошибка регистрации';
+                    
+                    switch(error.code) {
+                        case 'auth/email-already-in-use':
+                            errorMessage = 'Email уже используется';
+                            // Проверяем, может пользователь не подтвердил email
+                            showMessage('Этот email уже зарегистрирован. Проверьте почту для подтверждения или восстановите доступ.', 'warning');
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = 'Неверный формат email';
+                            break;
+                        case 'auth/operation-not-allowed':
+                            errorMessage = 'Регистрация отключена';
+                            break;
+                        case 'auth/weak-password':
+                            errorMessage = 'Пароль слишком слабый (минимум 6 символов)';
+                            break;
+                        case 'auth/too-many-requests':
+                            errorMessage = 'Слишком много запросов. Подождите 5 минут';
+                            break;
+                        default:
+                            errorMessage = `Ошибка: ${error.message}`;
+                    }
+                    
+                    showMessage(errorMessage, 'error');
+                    
+                    // Пытаемся удалить временного пользователя в случае ошибки
+                    if (auth.currentUser) {
+                        auth.currentUser.delete().catch(() => {});
+                    }
+                })
+                .finally(() => {
+                    btnText.textContent = originalText;
+                    btn.disabled = false;
+                });
+        }
+
+        // Функция завершения регистрации после подтверждения email
+        function completeRegistration(user) {
+            if (!pendingRegistrationData) return;
+            
+            console.log("Завершение регистрации для пользователя:", user.uid);
+            
+            // Создаем финальный аккаунт в базе данных
+            const userData = {
+                name: pendingRegistrationData.name,
+                email: pendingRegistrationData.email,
+                emailVerified: true,
+                createdAt: Date.now(),
+                lastLogin: Date.now(),
+                status: 'active'
+            };
+            
+            database.ref(`users/${user.uid}`).set(userData)
+                .then(() => {
+                    console.log("Аккаунт создан в базе данных");
+                    
+                    // Удаляем данные о незавершенной регистрации
+                    return database.ref(`pending_users/${user.uid}`).remove();
+                })
+                .then(() => {
+                    console.log("Временные данные удалены");
+                    
+                    // Показываем сообщение об успехе
+                    showMessage('Email подтвержден! Регистрация завершена. Теперь вы можете войти в систему.', 'success');
+                    
+                    // Сбрасываем данные о незавершенной регистрации
+                    pendingRegistrationData = null;
+                    
+                    // Останавливаем проверку
+                    stopEmailVerificationCheck();
+                    
+                    // Перенаправляем на страницу профиля
+                    setTimeout(() => {
+                        window.location.href = 'profile.html';
+                    }, 3000);
+                })
+                .catch((error) => {
+                    console.error("Ошибка завершения регистрации:", error);
+                    showMessage('Ошибка завершения регистрации. Попробуйте войти в систему.', 'error');
+                });
+        }
+
+        // Функция проверки подтверждения email
+        function startEmailVerificationCheck() {
+            if (emailVerificationTimer) {
+                clearInterval(emailVerificationTimer);
+            }
+            
+            emailVerificationTimer = setInterval(() => {
+                if (pendingRegistrationData) {
+                    // Пытаемся войти с сохраненными данными
+                    auth.signInWithEmailAndPassword(pendingRegistrationData.email, pendingRegistrationData.password)
+                        .then((userCredential) => {
+                            const user = userCredential.user;
+                            
+                            if (user.emailVerified) {
+                                console.log("Email подтвержден!");
+                                completeRegistration(user);
+                            }
+                            
+                            // Выходим из системы
+                            return auth.signOut();
+                        })
+                        .catch((error) => {
+                            console.error("Ошибка проверки подтверждения:", error);
+                        });
+                } else {
+                    stopEmailVerificationCheck();
+                }
+            }, 5000); // Проверяем каждые 5 секунд
+        }
+
+        function stopEmailVerificationCheck() {
+            if (emailVerificationTimer) {
+                clearInterval(emailVerificationTimer);
+                emailVerificationTimer = null;
+            }
+        }
+
+        // Функция для расчета времени задержки
+        function getResendDelay() {
+            if (resendAttempts === 1) return 60; // 1 минута для первой повторной отправки
+            if (resendAttempts === 2) return 180; // 3 минуты для второй повторной отправки
+            if (resendAttempts >= 3) return 600; // 10 минут для третьей и последующих
+            return 0; // Нет задержки
+        }
+
+        // Функция запуска таймера задержки
+        function startResendTimer(delay) {
+            canResend = false;
+            const timerEl = document.getElementById('resendTimer');
+            const timerCountEl = document.getElementById('timerCount');
+            
+            timerEl.style.display = 'block';
+            
+            let timeLeft = delay;
+            timerCountEl.textContent = timeLeft;
+            
+            if (resendTimerInterval) {
+                clearInterval(resendTimerInterval);
+            }
+            
+            resendTimerInterval = setInterval(() => {
+                timeLeft--;
+                timerCountEl.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(resendTimerInterval);
+                    timerEl.style.display = 'none';
+                    canResend = true;
+                    
+                    const resendBtn = document.querySelector('.resend-btn');
+                    if (resendBtn) {
+                        resendBtn.disabled = false;
+                        resendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить письмо повторно';
+                    }
+                }
+            }, 1000);
+        }
+
+        // Функция повторной отправки письма подтверждения
+        function resendVerificationEmail() {
+            if (!pendingRegistrationData) {
+                showMessage('Нет данных для отправки', 'error');
+                return;
+            }
+            
+            if (!canResend) {
+                showMessage('Подождите перед повторной отправкой', 'warning');
+                return;
+            }
+            
+            // Увеличиваем счетчик попыток
+            resendAttempts++;
+            
+            // Получаем задержку
+            const delay = getResendDelay();
+            
+            const resendBtn = document.querySelector('.resend-btn');
+            if (resendBtn) {
+                resendBtn.disabled = true;
+                resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+            }
+            
+            // Авторизуемся для отправки письма
+            auth.signInWithEmailAndPassword(pendingRegistrationData.email, pendingRegistrationData.password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    
+                    // Проверяем, не подтвержден ли уже email
+                    if (user.emailVerified) {
+                        showMessage('Email уже подтвержден! Завершаем регистрацию...', 'success');
+                        completeRegistration(user);
+                        return auth.signOut();
+                    }
+                    
+                    // Отправляем письмо повторно
+                    return user.sendEmailVerification();
+                })
+                .then(() => {
+                    // Обновляем счетчик попыток в базе данных
+                    if (pendingRegistrationData && pendingRegistrationData.userId) {
+                        database.ref(`pending_users/${pendingRegistrationData.userId}/resendAttempts`).set(resendAttempts);
+                    }
+                    
+                    showMessage(`Письмо с подтверждением отправлено повторно! ${delay > 0 ? `Следующая отправка будет доступна через ${delay} секунд.` : ''}`, 'success');
+                    
+                    // Запускаем таймер задержки
+                    if (delay > 0) {
+                        startResendTimer(delay);
+                    } else {
+                        canResend = true;
+                        if (resendBtn) {
+                            resendBtn.disabled = false;
+                            resendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить письмо повторно';
+                        }
+                    }
+                    
+                    return auth.signOut();
+                })
+                .catch((error) => {
+                    console.error("Ошибка отправки письма:", error);
+                    resendAttempts--; // Откатываем счетчик при ошибке
+                    
+                    let errorMessage = 'Ошибка отправки письма. Попробуйте позже.';
+                    if (error.code === 'auth/too-many-requests') {
+                        errorMessage = 'Слишком много запросов. Подождите 5 минут.';
+                        // Устанавливаем большую задержку
+                        startResendTimer(300);
+                    }
+                    
+                    showMessage(errorMessage, 'error');
+                    
+                    if (resendBtn) {
+                        resendBtn.disabled = false;
+                        resendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить письмо повторно';
+                    }
+                });
+        }
+
+        // Функция показа уведомления о подтверждении email
+        function showVerificationNotice(email) {
+            const notice = document.getElementById('verificationNotice');
+            const emailText = document.getElementById('verificationEmailText');
+            
+            emailText.textContent = `Email: ${email}`;
+            notice.style.display = 'block';
+            
+            // Добавляем кнопку для повторной отправки письма
+            if (!notice.querySelector('.resend-btn')) {
+                const resendBtn = document.createElement('button');
+                resendBtn.className = 'auth-btn secondary resend-btn';
+                resendBtn.style.marginTop = '10px';
+                resendBtn.style.width = '100%';
+                resendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить письмо повторно';
+                resendBtn.onclick = resendVerificationEmail;
+                notice.appendChild(resendBtn);
+            }
+        }
+
+        // Функции для работы с сообщениями
+        function showMessage(message, type) {
+            const messageEl = document.getElementById('authMessage');
+            messageEl.textContent = message;
+            messageEl.className = 'auth-message ' + type;
+            messageEl.style.display = 'block';
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageEl.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function clearMessage() {
+            document.getElementById('authMessage').style.display = 'none';
+        }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Страница регистрации загружена");
+            
+            // Проверяем, нет ли незавершенной регистрации
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+            const oobCode = urlParams.get('oobCode');
+            
+            if (mode === 'verifyEmail' && oobCode) {
+                showMessage('Проверяем подтверждение email...', 'warning');
+            }
+        });
+    </script>
+</body>
+</html>

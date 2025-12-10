@@ -1,0 +1,3513 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Basement | Косметика премиум</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        /* ============================================
+           OZON STYLE - DARK THEME - GLASS MORPHISM
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        :root {
+            --ozon-blue: #005BFF;
+            --ozon-blue-dark: #004ECC;
+            --ozon-orange: #F90;
+            --ozon-green: #0FA;
+            --ozon-red: #FF3B30;
+            --ozon-gray-10: #1A1A1A;
+            --ozon-gray-20: #2C2C2E;
+            --ozon-gray-30: #3C3C3E;
+            --ozon-gray-40: #48484A;
+            --ozon-gray-50: #8E8E93;
+            --ozon-gray-60: #AEAEB2;
+            --ozon-gray-70: #C7C7CC;
+            --ozon-gray-80: #E5E5EA;
+            --ozon-white: #FFFFFF;
+            --glass-bg: rgba(44, 44, 46, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.25);
+            --shadow-blue: 0 4px 20px rgba(0, 91, 255, 0.25);
+            --shadow-orange: 0 4px 20px rgba(255, 153, 0, 0.25);
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
+            color: var(--ozon-white);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 15px;
+            line-height: 1.5;
+            min-height: 100vh;
+            max-width: 100vw;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(0, 91, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 153, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* GLASS EFFECT */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-md);
+        }
+
+        .glass-light {
+            background: rgba(60, 60, 62, 0.7);
+            backdrop-filter: blur(15px) saturate(160%);
+            -webkit-backdrop-filter: blur(15px) saturate(160%);
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--ozon-gray-20);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--ozon-gray-40);
+            border-radius: 3px;
+            transition: var(--transition-base);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--ozon-gray-50);
+        }
+
+        /* CONTAINER */
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* ANIMATIONS */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            border: none;
+            outline: none;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            user-select: none;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--ozon-blue), var(--ozon-blue-dark));
+            color: var(--ozon-white);
+            box-shadow: var(--shadow-blue);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--ozon-blue-dark), var(--ozon-blue));
+            box-shadow: 0 6px 24px rgba(0, 91, 255, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, var(--ozon-orange), #FF7A00);
+            color: var(--ozon-white);
+            box-shadow: var(--shadow-orange);
+        }
+
+        .btn-accent:hover {
+            background: linear-gradient(135deg, #FF7A00, var(--ozon-orange));
+            box-shadow: 0 6px 24px rgba(255, 153, 0, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--ozon-gray-30);
+            color: var(--ozon-white);
+            border: 1px solid var(--ozon-gray-40);
+        }
+
+        .btn-secondary:hover {
+            background: var(--ozon-gray-40);
+            border-color: var(--ozon-gray-50);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00D68F, #00B877);
+            color: var(--ozon-white);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--ozon-red), #E53535);
+            color: var(--ozon-white);
+        }
+
+        .btn-icon {
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border-radius: 12px;
+            background: var(--ozon-gray-20);
+            border: 1px solid var(--ozon-gray-30);
+            color: var(--ozon-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-base);
+        }
+
+        .btn-icon:hover {
+            background: var(--ozon-gray-30);
+            border-color: var(--ozon-blue);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-blue);
+        }
+
+        .btn-icon.active {
+            background: var(--ozon-blue);
+            border-color: var(--ozon-blue);
+            color: var(--ozon-white);
+        }
+
+        .badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, var(--ozon-red), #E53535);
+            color: var(--ozon-white);
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            border: 2px solid var(--ozon-gray-20);
+            animation: pulse 2s infinite;
+        }
+
+        /* HEADER - ТОЛЬКО ПОИСК */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 12px 16px;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        /* УБРАЛИ логотип и кнопки в шапке */
+        .header-top {
+            display: none !important;
+        }
+
+        /* УБРАЛИ кнопку админ */
+        .admin-link {
+            display: none !important;
+        }
+
+        /* SEARCH */
+        .search-container {
+            position: relative;
+            margin-bottom: 0;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: var(--ozon-gray-20);
+            border: 1px solid var(--ozon-gray-30);
+            border-radius: 14px;
+            padding: 8px 12px;
+            transition: all var(--transition-base);
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--ozon-blue);
+            box-shadow: var(--shadow-blue);
+            background: var(--ozon-gray-10);
+        }
+
+        .search-bar i {
+            color: var(--ozon-gray-50);
+            font-size: 18px;
+            margin-right: 12px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--ozon-white);
+            font-size: 15px;
+            font-weight: 400;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: var(--ozon-gray-50);
+        }
+
+        .search-clear {
+            opacity: 0;
+            visibility: hidden;
+            background: none;
+            border: none;
+            color: var(--ozon-gray-50);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 8px;
+            transition: all var(--transition-base);
+            margin-right: 8px;
+        }
+
+        .search-clear.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .search-clear:hover {
+            color: var(--ozon-white);
+            background: var(--ozon-gray-30);
+        }
+
+        .search-submit {
+            opacity: 0;
+            visibility: hidden;
+            background: var(--ozon-blue);
+            border: none;
+            color: var(--ozon-white);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 10px;
+            transition: all var(--transition-base);
+            font-weight: 500;
+        }
+
+        .search-submit.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .search-submit:hover {
+            background: var(--ozon-blue-dark);
+        }
+
+        /* QUICK ACTIONS */
+        .quick-actions {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 16px 16px 20px;
+            margin: 0;
+            scrollbar-width: none;
+        }
+
+        .quick-actions::-webkit-scrollbar {
+            display: none;
+        }
+
+        .quick-action {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            min-width: 70px;
+            padding: 12px 8px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .quick-action:hover {
+            transform: translateY(-4px);
+            border-color: var(--ozon-blue);
+            box-shadow: var(--shadow-blue);
+            background: rgba(0, 91, 255, 0.1);
+        }
+
+        .quick-action i {
+            font-size: 22px;
+            color: var(--ozon-blue);
+            margin-bottom: 2px;
+        }
+
+        .quick-action span {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--ozon-white);
+            text-align: center;
+        }
+
+        /* CATEGORIES */
+        .categories {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 8px 16px 20px;
+            scrollbar-width: none;
+            margin-bottom: 8px;
+        }
+
+        .categories::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-btn {
+            padding: 10px 20px;
+            background: var(--ozon-gray-20);
+            border: 1px solid var(--ozon-gray-30);
+            border-radius: 24px;
+            color: var(--ozon-gray-70);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .category-btn:hover {
+            background: var(--ozon-gray-30);
+            transform: translateY(-2px);
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, var(--ozon-blue), var(--ozon-blue-dark));
+            color: var(--ozon-white);
+            border-color: transparent;
+            box-shadow: var(--shadow-blue);
+        }
+
+        /* BANNER */
+        .banner {
+            margin: 0 16px 20px;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .banner-content {
+            padding: 24px;
+            background: linear-gradient(135deg, rgba(0, 91, 255, 0.9), rgba(255, 153, 0, 0.7));
+            position: relative;
+            z-index: 1;
+        }
+
+        .banner-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.15;
+            z-index: -1;
+        }
+
+        .banner h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .banner p {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        /* PRODUCTS */
+        .products-section {
+            padding: 0px 16px 20px;
+            padding-bottom: 80px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--ozon-gray-30);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--ozon-blue);
+        }
+
+        .view-all {
+            color: var(--ozon-blue);
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all var(--transition-base);
+        }
+
+        .view-all:hover {
+            gap: 8px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        /* PRODUCT CARD */
+        .product-card {
+            background: var(--ozon-gray-20);
+            border: 1px solid var(--ozon-gray-30);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all var(--transition-base);
+            position: relative;
+            animation: scaleIn 0.4s ease-out;
+            animation-fill-mode: both;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--ozon-blue);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .product-card:nth-child(odd) {
+            animation-delay: 0.1s;
+        }
+
+        .product-card:nth-child(even) {
+            animation-delay: 0.2s;
+        }
+
+        .product-badges {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            gap: 6px;
+            z-index: 2;
+        }
+
+        .badge-new {
+            background: linear-gradient(135deg, var(--ozon-orange), #FF7A00);
+            color: var(--ozon-white);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            box-shadow: var(--shadow-orange);
+        }
+
+        .badge-sale {
+            background: linear-gradient(135deg, var(--ozon-red), #E53535);
+            color: var(--ozon-white);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(255, 59, 48, 0.3);
+        }
+
+        .favorite-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 36px;
+            height: 36px;
+            background: rgba(44, 44, 46, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ozon-gray-50);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            z-index: 2;
+        }
+
+        .favorite-btn:hover {
+            background: var(--ozon-red);
+            color: var(--ozon-white);
+            border-color: var(--ozon-red);
+            transform: scale(1.1);
+        }
+
+        .favorite-btn.active {
+            background: var(--ozon-red);
+            color: var(--ozon-white);
+            border-color: var(--ozon-red);
+            animation: pulse 0.6s ease;
+        }
+
+        /* УВЕЛИЧИВАЕМ ВЫСОТУ ФОТО ТОВАРА ЕЩЕ БОЛЬШЕ */
+        .product-image {
+            width: 100%;
+            height: 220px;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(135deg, var(--ozon-gray-30), var(--ozon-gray-20));
+            flex-shrink: 0;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.1);
+        }
+
+        .product-info {
+            padding: 12px 16px 16px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .product-category {
+            font-size: 11px;
+            color: var(--ozon-gray-50);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .product-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ozon-white);
+            margin-bottom: 6px;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex-grow: 1;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .stars {
+            color: var(--ozon-orange);
+            font-size: 11px;
+        }
+
+        .rating-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--ozon-white);
+        }
+
+        .rating-count {
+            font-size: 11px;
+            color: var(--ozon-gray-50);
+        }
+
+        .product-price {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .current-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--ozon-white);
+        }
+
+        .old-price {
+            font-size: 13px;
+            color: var(--ozon-gray-50);
+            text-decoration: line-through;
+        }
+
+        .add-to-cart {
+            width: 100%;
+            padding: 10px;
+            background: var(--ozon-gray-30);
+            border: 1px solid var(--ozon-gray-40);
+            border-radius: 12px;
+            color: var(--ozon-white);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: auto;
+        }
+
+        .add-to-cart:hover {
+            background: var(--ozon-blue);
+            border-color: var(--ozon-blue);
+            transform: translateY(-2px);
+        }
+
+        .add-to-cart.added {
+            background: var(--ozon-green);
+            border-color: var(--ozon-green);
+            color: var(--ozon-gray-10);
+        }
+
+        /* BOTTOM NAV */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(30px) saturate(200%);
+            -webkit-backdrop-filter: blur(30px) saturate(200%);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px 16px;
+            z-index: 1000;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .nav-items {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            color: var(--ozon-gray-50);
+            font-size: 11px;
+            font-weight: 500;
+            transition: all var(--transition-base);
+            position: relative;
+            padding: 8px 12px;
+            border-radius: 12px;
+        }
+
+        .nav-item:hover {
+            color: var(--ozon-blue);
+            background: rgba(0, 91, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-item.active {
+            color: var(--ozon-blue);
+            background: rgba(0, 91, 255, 0.15);
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            transition: all var(--transition-base);
+        }
+
+        .nav-item.active i {
+            transform: translateY(-2px);
+        }
+
+        /* FILTERS PANEL */
+        .filters-panel {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--ozon-gray-10);
+            z-index: 1100;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            max-width: 400px;
+        }
+
+        .filters-panel.active {
+            transform: translateX(-100%);
+        }
+
+        .filters-header {
+            padding: 24px 16px 16px;
+            background: var(--ozon-gray-20);
+            border-bottom: 1px solid var(--ozon-gray-30);
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .filters-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .filters-content {
+            padding: 20px 16px;
+        }
+
+        .filter-group {
+            margin-bottom: 32px;
+        }
+
+        .filter-group h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-chip {
+            padding: 10px 16px;
+            background: var(--ozon-gray-30);
+            border: 1px solid var(--ozon-gray-40);
+            border-radius: 20px;
+            color: var(--ozon-gray-70);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .filter-chip:hover {
+            background: var(--ozon-gray-40);
+            transform: translateY(-2px);
+        }
+
+        .filter-chip.active {
+            background: var(--ozon-blue);
+            border-color: var(--ozon-blue);
+            color: var(--ozon-white);
+            box-shadow: var(--shadow-blue);
+        }
+
+        .price-range {
+            background: var(--ozon-gray-20);
+            border: 1px solid var(--ozon-gray-30);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .range-slider {
+            height: 4px;
+            background: var(--ozon-gray-40);
+            border-radius: 2px;
+            margin: 24px 0;
+            position: relative;
+        }
+
+        .range-slider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 50%;
+            height: 100%;
+            background: var(--ozon-blue);
+            border-radius: 2px;
+        }
+
+        .range-thumb {
+            position: absolute;
+            top: 50%;
+            width: 24px;
+            height: 24px;
+            background: var(--ozon-white);
+            border: 3px solid var(--ozon-blue);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-base);
+        }
+
+        .range-thumb:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .price-inputs {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .price-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--ozon-gray-30);
+            border: 1px solid var(--ozon-gray-40);
+            border-radius: 12px;
+            color: var(--ozon-white);
+            font-size: 16px;
+            font-weight: 600;
+            outline: none;
+            text-align: center;
+        }
+
+        .price-input:focus {
+            border-color: var(--ozon-blue);
+            box-shadow: var(--shadow-blue);
+        }
+
+        .filter-actions {
+            position: sticky;
+            bottom: 0;
+            padding: 16px;
+            background: var(--ozon-gray-10);
+            border-top: 1px solid var(--ozon-gray-30);
+            display: flex;
+            gap: 12px;
+        }
+
+        /* PRODUCT DETAIL */
+        .product-detail {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--ozon-gray-10);
+            z-index: 1200;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .product-detail.active {
+            transform: translateY(0);
+        }
+
+        .detail-header {
+            position: sticky;
+            top: 0;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 16px;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .detail-close {
+            width: 40px;
+            height: 40px;
+            background: var(--ozon-gray-30);
+            border: 1px solid var(--ozon-gray-40);
+            border-radius: 12px;
+            color: var(--ozon-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .detail-close:hover {
+            background: var(--ozon-red);
+            border-color: var(--ozon-red);
+            transform: rotate(90deg);
+        }
+
+        .detail-images {
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-slider {
+            display: flex;
+            height: 100%;
+            transition: transform 0.4s ease;
+        }
+
+        .image-slide {
+            min-width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--ozon-gray-30), var(--ozon-gray-20));
+        }
+
+        /* СКРУГЛЕНИЕ УГЛОВ ФОТО В ДЕТАЛЬНОЙ СТРАНИЦЕ */
+        .image-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .slider-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .slider-dot {
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .slider-dot.active {
+            background: var(--ozon-white);
+            transform: scale(1.2);
+        }
+
+        .detail-content {
+            padding: 24px 16px;
+        }
+
+        .detail-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        .detail-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            color: var(--ozon-gray-50);
+            font-size: 14px;
+        }
+
+        .detail-price {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .detail-current {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--ozon-white);
+        }
+
+        .detail-old {
+            font-size: 20px;
+            color: var(--ozon-gray-50);
+            text-decoration: line-through;
+        }
+
+        .detail-description {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--ozon-gray-70);
+            margin-bottom: 32px;
+        }
+
+        /* REVIEWS SECTION */
+        .reviews-section {
+            margin-top: 32px;
+            border-top: 1px solid var(--ozon-gray-30);
+            padding-top: 24px;
+        }
+
+        .reviews-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .reviews-title {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-review-btn {
+            background: var(--ozon-blue);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all var(--transition-base);
+        }
+
+        .add-review-btn:hover {
+            background: var(--ozon-blue-dark);
+            transform: translateY(-2px);
+        }
+
+        .average-rating {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: var(--ozon-gray-20);
+            border-radius: 16px;
+            border: 1px solid var(--ozon-gray-30);
+        }
+
+        .average-rating-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--ozon-white);
+        }
+
+        .average-rating-details {
+            flex: 1;
+        }
+
+        .average-rating-stars {
+            font-size: 18px;
+            color: var(--ozon-orange);
+            margin-bottom: 4px;
+        }
+
+        .average-rating-text {
+            font-size: 14px;
+            color: var(--ozon-gray-50);
+        }
+
+        .rating-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .rating-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rating-bar-label {
+            font-size: 12px;
+            color: var(--ozon-gray-50);
+            min-width: 40px;
+        }
+
+        .rating-bar-progress {
+            flex: 1;
+            height: 6px;
+            background: var(--ozon-gray-30);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .rating-bar-fill {
+            height: 100%;
+            background: var(--ozon-orange);
+            border-radius: 3px;
+        }
+
+        .rating-bar-count {
+            font-size: 12px;
+            color: var(--ozon-gray-50);
+            min-width: 20px;
+        }
+
+        .reviews-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .review-item {
+            background: var(--ozon-gray-20);
+            border: 1px solid var(--ozon-gray-30);
+            border-radius: 16px;
+            padding: 16px;
+        }
+
+        .review-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .review-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--ozon-blue), var(--ozon-orange));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ozon-white);
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .review-user {
+            flex: 1;
+        }
+
+        .review-user-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .review-date {
+            font-size: 12px;
+            color: var(--ozon-gray-50);
+        }
+
+        .review-rating {
+            color: var(--ozon-orange);
+            font-size: 14px;
+        }
+
+        .review-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--ozon-gray-70);
+            margin-bottom: 12px;
+        }
+
+        .review-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--ozon-gray-50);
+        }
+
+        .no-reviews {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--ozon-gray-50);
+        }
+
+        .no-reviews i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* REVIEW MODAL */
+        .review-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--ozon-gray-10);
+            z-index: 1300;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .review-modal.active {
+            transform: translateY(0);
+        }
+
+        .review-modal-header {
+            position: sticky;
+            top: 0;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 16px;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--ozon-gray-30);
+        }
+
+        .review-modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .review-modal-close {
+            width: 40px;
+            height: 40px;
+            background: var(--ozon-gray-30);
+            border: 1px solid var(--ozon-gray-40);
+            border-radius: 12px;
+            color: var(--ozon-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .review-modal-close:hover {
+            background: var(--ozon-red);
+            border-color: var(--ozon-red);
+            transform: rotate(90deg);
+        }
+
+        .review-modal-content {
+            padding: 24px 16px;
+        }
+
+        .rating-input {
+            margin-bottom: 24px;
+        }
+
+        .rating-input label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .stars-input {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .star-btn {
+            background: none;
+            border: none;
+            font-size: 32px;
+            color: var(--ozon-gray-30);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            padding: 0;
+        }
+
+        .star-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .star-btn.active {
+            color: var(--ozon-orange);
+        }
+
+        .selected-rating-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--ozon-gray-50);
+            margin-bottom: 8px;
+        }
+
+        .review-form-group {
+            margin-bottom: 20px;
+        }
+
+        .review-form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .review-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            background: var(--ozon-gray-20);
+            border: 1px solid var(--ozon-gray-30);
+            border-radius: 12px;
+            color: var(--ozon-white);
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            resize: vertical;
+            outline: none;
+            transition: all var(--transition-base);
+        }
+
+        .review-textarea:focus {
+            border-color: var(--ozon-blue);
+            box-shadow: var(--shadow-blue);
+        }
+
+        .review-form-actions {
+            position: sticky;
+            bottom: 0;
+            padding: 16px;
+            background: var(--ozon-gray-10);
+            border-top: 1px solid var(--ozon-gray-30);
+            display: flex;
+            gap: 12px;
+        }
+
+        .review-error {
+            color: var(--ozon-red);
+            font-size: 14px;
+            margin-bottom: 16px;
+            text-align: center;
+            padding: 8px;
+            background: rgba(255, 59, 48, 0.1);
+            border-radius: 8px;
+            border: 1px solid var(--ozon-red);
+            display: none;
+        }
+
+        .review-error.show {
+            display: block;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .spec-item {
+            background: var(--ozon-gray-20);
+            border: 1px solid var(--ozon-gray-30);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .spec-label {
+            font-size: 12px;
+            color: var(--ozon-gray-50);
+            margin-bottom: 4px;
+        }
+
+        .spec-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--ozon-white);
+        }
+
+        .detail-actions {
+            position: sticky;
+            bottom: 0;
+            padding: 16px;
+            background: var(--ozon-gray-10);
+            border-top: 1px solid var(--ozon-gray-30);
+            display: flex;
+            gap: 12px;
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--ozon-gray-20);
+            border: 1px solid var(--ozon-gray-30);
+            border-radius: 14px;
+            padding: 16px 24px;
+            color: var(--ozon-white);
+            font-size: 15px;
+            font-weight: 500;
+            z-index: 1300;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 90%;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            border-color: var(--ozon-green);
+            background: rgba(0, 250, 170, 0.1);
+        }
+
+        .toast.error {
+            border-color: var(--ozon-red);
+            background: rgba(255, 59, 48, 0.1);
+        }
+
+        .toast.warning {
+            border-color: var(--ozon-orange);
+            background: rgba(255, 153, 0, 0.1);
+        }
+
+        /* LOADING - ЦЕНТРАЛИЗОВАНО */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--ozon-gray-50);
+            font-size: 15px;
+            font-weight: 500;
+            text-align: center;
+            grid-column: 1 / -1;
+            width: 100%;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--ozon-gray-30);
+            border-top-color: var(--ozon-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+            animation: fadeIn 0.6s ease;
+            grid-column: 1 / -1;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            color: var(--ozon-gray-30);
+            margin-bottom: 24px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--ozon-white);
+        }
+
+        .empty-state p {
+            color: var(--ozon-gray-50);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            .container {
+                padding-bottom: 80px;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .product-card {
+                max-width: 100%;
+            }
+
+            .product-image {
+                height: 200px;
+            }
+
+            .detail-content {
+                padding: 20px 16px;
+            }
+
+            .detail-current {
+                font-size: 28px;
+            }
+
+            .specs-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .average-rating {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .rating-bars {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .header {
+                padding: 8px 12px;
+            }
+
+            .search-submit {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .quick-action {
+                min-width: 60px;
+                padding: 10px 6px;
+            }
+
+            .quick-action i {
+                font-size: 18px;
+            }
+
+            .category-btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .product-image {
+                height: 180px;
+            }
+        }
+
+        /* OPTIMIZATION */
+        .will-change {
+            will-change: transform, opacity;
+        }
+
+        .hardware-accelerated {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header - ТОЛЬКО ПОИСК -->
+        <header class="header glass">
+            <div class="search-container">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Искать на basement">
+                    <button class="search-clear" id="clearSearch">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button class="search-submit" id="searchSubmit">
+                        Найти
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="face.html" class="quick-action">
+                <i class="fas fa-smile"></i>
+                <span>Лицо</span>
+            </a>
+            <a href="body.html" class="quick-action">
+                <i class="fas fa-user"></i>
+                <span>Тело</span>
+            </a>
+            <a href="hair.html" class="quick-action">
+                <i class="fas fa-spray-can"></i>
+                <span>Волосы</span>
+            </a>
+            <a href="sunscreen.html" class="quick-action">
+                <i class="fas fa-sun"></i>
+                <span>Защита</span>
+            </a>
+            <a href="new.html" class="quick-action">
+                <i class="fas fa-gem"></i>
+                <span>Новинки</span>
+            </a>
+        </div>
+
+        <!-- Categories -->
+        <div class="categories">
+            <button class="category-btn active" data-category="all">Все товары</button>
+            <button class="category-btn" data-category="face">Для лица</button>
+            <button class="category-btn" data-category="body">Для тела</button>
+            <button class="category-btn" data-category="hair">Для волос</button>
+            <button class="category-btn" data-category="sunscreen">Солнцезащита</button>
+        </div>
+
+        <!-- Banner -->
+        <div class="banner">
+            <div class="banner-content">
+                <h2><i class="fas fa-crown"></i> Премиум косметика</h2>
+                <p>Скидка 25% на первую покупку. Подбор по типу кожи с бесплатной консультацией.</p>
+                <button class="btn btn-accent" onclick="showFilters()">
+                    <i class="fas fa-magic"></i> Подобрать средство
+                </button>
+            </div>
+        </div>
+
+        <!-- Products Section -->
+        <section class="products-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-fire"></i> Популярные товары
+                </h2>
+                <a href="#all" class="view-all">
+                    Все товары <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="products-grid" id="productsGrid">
+                <!-- Products will be loaded here -->
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Загружаем товары...</p>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <i class="fas fa-search"></i>
+                <h3>Товары не найдены</h3>
+                <p>Попробуйте изменить параметры поиска или выберите другую категорию</p>
+                <button class="btn btn-secondary" onclick="clearFilters()">
+                    Сбросить фильтры
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav glass">
+        <div class="nav-items">
+            <a href="index.html" class="nav-item active">
+                <i class="fas fa-store"></i>
+                <span>Магазин</span>
+            </a>
+            <a href="cart.html" class="nav-item" id="cartTab">
+                <i class="fas fa-shopping-bag"></i>
+                <span>Корзина</span>
+                <span class="badge" id="cartTabBadge">0</span>
+            </a>
+            <a href="favorites.html" class="nav-item" id="favoritesTab">
+                <i class="fas fa-heart"></i>
+                <span>Избранное</span>
+                <span class="badge" id="favoritesTabBadge">0</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Профиль</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Filters Panel -->
+    <div class="filters-panel" id="filtersPanel">
+        <div class="filters-header glass">
+            <h2><i class="fas fa-filter"></i> Фильтры</h2>
+        </div>
+        <div class="filters-content">
+            <!-- Categories -->
+            <div class="filter-group">
+                <h3><i class="fas fa-tags"></i> Категория</h3>
+                <div class="filter-chips">
+                    <button class="filter-chip active" data-filter="category" value="all">Все</button>
+                    <button class="filter-chip" data-filter="category" value="face">Лицо</button>
+                    <button class="filter-chip" data-filter="category" value="body">Тело</button>
+                    <button class="filter-chip" data-filter="category" value="hair">Волосы</button>
+                    <button class="filter-chip" data-filter="category" value="sunscreen">Защита</button>
+                </div>
+            </div>
+
+            <!-- Skin Type -->
+            <div class="filter-group">
+                <h3><i class="fas fa-user-circle"></i> Тип кожи</h3>
+                <div class="filter-chips">
+                    <button class="filter-chip" data-filter="skinType" value="all">Любой</button>
+                    <button class="filter-chip" data-filter="skinType" value="normal">Нормальная</button>
+                    <button class="filter-chip" data-filter="skinType" value="dry">Сухая</button>
+                    <button class="filter-chip" data-filter="skinType" value="oily">Жирная</button>
+                    <button class="filter-chip" data-filter="skinType" value="sensitive">Чувствительная</button>
+                </div>
+            </div>
+
+            <!-- Price Range -->
+            <div class="filter-group">
+                <h3><i class="fas fa-ruble-sign"></i> Цена, ₽</h3>
+                <div class="price-range">
+                    <div class="price-inputs">
+                        <input type="number" class="price-input" id="minPrice" placeholder="0" min="0" max="10000">
+                        <span>-</span>
+                        <input type="number" class="price-input" id="maxPrice" placeholder="10000" min="0" max="10000">
+                    </div>
+                    <div class="range-slider">
+                        <div class="range-thumb" id="rangeThumb"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; color: var(--ozon-gray-50);">
+                        <span>0</span>
+                        <span id="currentMaxPrice">10000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Brands -->
+            <div class="filter-group">
+                <h3><i class="fas fa-crown"></i> Бренд</h3>
+                <div class="filter-chips">
+                    <button class="filter-chip" data-filter="brand" value="all">Все</button>
+                    <button class="filter-chip" data-filter="brand" value="la_roche">La Roche-Posay</button>
+                    <button class="filter-chip" data-filter="brand" value="cerave">CeraVe</button>
+                    <button class="filter-chip" data-filter="brand" value="ordinary">The Ordinary</button>
+                    <button class="filter-chip" data-filter="brand" value="avene">Avene</button>
+                </div>
+            </div>
+        </div>
+        <div class="filter-actions">
+            <button class="btn btn-secondary" onclick="closeFilters()" style="flex: 1;">
+                Отмена
+            </button>
+            <button class="btn btn-primary" onclick="applyFilters()" style="flex: 2;">
+                Применить
+            </button>
+        </div>
+    </div>
+
+    <!-- Product Detail -->
+    <div class="product-detail" id="productDetail">
+        <div class="detail-header">
+            <button class="detail-close" onclick="closeProductDetail()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="detail-images">
+            <div class="image-slider" id="imageSlider"></div>
+            <div class="slider-controls" id="sliderControls"></div>
+        </div>
+
+        <div class="detail-content">
+            <h1 class="detail-title" id="detailTitle"></h1>
+            <div class="detail-meta">
+                <span><i class="fas fa-tag"></i> <span id="detailCategory"></span></span>
+                <span><i class="fas fa-star"></i> <span id="detailRating"></span></span>
+                <span><i class="fas fa-shopping-bag"></i> <span id="detailSales"></span></span>
+            </div>
+            <div class="detail-price">
+                <span class="detail-current" id="detailCurrentPrice"></span>
+                <span class="detail-old" id="detailOldPrice"></span>
+            </div>
+            <div class="detail-description" id="detailDescription"></div>
+
+            <div class="specs-grid">
+                <div class="spec-item">
+                    <div class="spec-label">Бренд</div>
+                    <div class="spec-value" id="specBrand"></div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">Тип кожи</div>
+                    <div class="spec-value" id="specSkinType"></div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">Объем</div>
+                    <div class="spec-value" id="specVolume"></div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">Страна</div>
+                    <div class="spec-value" id="specCountry"></div>
+                </div>
+            </div>
+
+            <!-- Reviews Section -->
+            <div class="reviews-section" id="reviewsSection">
+                <div class="reviews-header">
+                    <h3 class="reviews-title">
+                        <i class="fas fa-comment-alt"></i> Отзывы
+                    </h3>
+                    <button class="add-review-btn" id="addReviewBtn" onclick="openReviewModal()">
+                        <i class="fas fa-plus"></i> Оставить отзыв
+                    </button>
+                </div>
+
+                <!-- Average Rating -->
+                <div class="average-rating" id="averageRating">
+                    <div class="average-rating-value">0.0</div>
+                    <div class="average-rating-details">
+                        <div class="average-rating-stars" id="averageRatingStars"></div>
+                        <div class="average-rating-text" id="averageRatingText">0 отзывов</div>
+                    </div>
+                    <div class="rating-bars" id="ratingBars"></div>
+                </div>
+
+                <!-- Reviews List -->
+                <div class="reviews-list" id="reviewsList">
+                    <div class="no-reviews" id="noReviews">
+                        <i class="fas fa-comment-slash"></i>
+                        <h4>Пока нет отзывов</h4>
+                        <p>Будьте первым, кто оставит отзыв об этом товаре!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-actions">
+            <button class="btn btn-accent" onclick="buyNow()" style="flex: 2;">
+                <i class="fas fa-bolt"></i> Купить сейчас
+            </button>
+            <button class="btn btn-primary" id="detailCartBtn" onclick="toggleCartFromDetail()" style="flex: 1;">
+                <i class="fas fa-shopping-cart"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div class="review-modal" id="reviewModal">
+        <div class="review-modal-header">
+            <h3 class="review-modal-title">
+                <i class="fas fa-star"></i> Оставить отзыв
+            </h3>
+            <button class="review-modal-close" onclick="closeReviewModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="review-modal-content">
+            <div class="review-error" id="reviewError">
+                Пожалуйста, заполните все поля
+            </div>
+
+            <div class="rating-input">
+                <label>Ваша оценка:</label>
+                <div class="stars-input">
+                    <button class="star-btn" data-rating="1">
+                        <i class="far fa-star"></i>
+                    </button>
+                    <button class="star-btn" data-rating="2">
+                        <i class="far fa-star"></i>
+                    </button>
+                    <button class="star-btn" data-rating="3">
+                        <i class="far fa-star"></i>
+                    </button>
+                    <button class="star-btn" data-rating="4">
+                        <i class="far fa-star"></i>
+                    </button>
+                    <button class="star-btn" data-rating="5">
+                        <i class="far fa-star"></i>
+                    </button>
+                </div>
+                <div class="selected-rating-text" id="selectedRatingText">
+                    Нажмите на звезду, чтобы оценить
+                </div>
+            </div>
+
+            <div class="review-form-group">
+                <label for="reviewText">Ваш отзыв:</label>
+                <textarea 
+                    class="review-textarea" 
+                    id="reviewText" 
+                    placeholder="Поделитесь своим мнением о товаре..."
+                    maxlength="1000"
+                ></textarea>
+                <div style="text-align: right; font-size: 12px; color: var(--ozon-gray-50); margin-top: 4px;">
+                    <span id="charCount">0</span>/1000 символов
+                </div>
+            </div>
+        </div>
+        <div class="review-form-actions">
+            <button class="btn btn-secondary" onclick="closeReviewModal()" style="flex: 1;">
+                Отмена
+            </button>
+            <button class="btn btn-primary" onclick="submitReview()" style="flex: 2;">
+                Опубликовать отзыв
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_XhDZ9rUv7wFlQkHMFwvkA5muZY4T-5I",
+            authDomain: "estels-86a9c.firebaseapp.com",
+            databaseURL: "https://estels-86a9c-default-rtdb.firebaseio.com",
+            projectId: "estels-86a9c",
+            storageBucket: "estels-86a9c.firebasestorage.app",
+            messagingSenderId: "886795277090",
+            appId: "1:886795277090:web:0e7cff9111d69e8b828b7b",
+            measurementId: "G-FCH1Y0WX17"
+        };
+
+        // Initialize Firebase
+        let firebaseApp;
+        let db;
+        let auth;
+        let database;
+        let currentUser = null;
+        let currentProduct = null;
+        let products = [];
+        let filteredProducts = [];
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let userFavorites = [];
+        let activeFilters = {
+            category: 'all',
+            skinType: 'all',
+            brand: 'all',
+            minPrice: 0,
+            maxPrice: 10000,
+            search: ''
+        };
+        let selectedRating = 0;
+        let productReviews = [];
+        let productReviewStats = null;
+
+        // DOM Ready
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize Firebase
+            if (!firebase.apps.length) {
+                firebaseApp = firebase.initializeApp(firebaseConfig);
+            } else {
+                firebaseApp = firebase.app();
+            }
+
+            db = firebase.firestore();
+            auth = firebase.auth();
+            database = firebase.database();
+
+            // Initialize app
+            initApp();
+
+            // Проверяем аутентификацию и загружаем данные
+            checkAuthAndLoadData();
+
+            updateCartBadge();
+            updateFavoritesBadge();
+        });
+
+        // Проверка аутентификации и загрузка данных
+        function checkAuthAndLoadData() {
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    currentUser = user;
+                    console.log('Пользователь авторизован:', user.uid);
+                    loadUserFavorites();
+                    loadProducts();
+                } else {
+                    currentUser = null;
+                    userFavorites = [];
+                    console.log('Пользователь не авторизован');
+                    loadProducts();
+                }
+            });
+        }
+
+        // Загрузка избранного пользователя
+        function loadUserFavorites() {
+            if (!currentUser) {
+                userFavorites = [];
+                return;
+            }
+
+            database.ref('users/' + currentUser.uid + '/favorites').once('value')
+                .then((snapshot) => {
+                    userFavorites = [];
+                    if (snapshot.exists()) {
+                        const favoritesData = snapshot.val();
+                        Object.keys(favoritesData).forEach((key) => {
+                            const favorite = favoritesData[key];
+                            if (favorite && favorite.productId) {
+                                userFavorites.push(favorite.productId);
+                            }
+                        });
+                    }
+                    console.log('Загружено избранное:', userFavorites);
+                    updateFavoritesBadge();
+                    if (products.length > 0) {
+                        renderProducts();
+                    }
+                })
+                .catch((error) => {
+                    console.error('Ошибка загрузки избранного:', error);
+                    userFavorites = [];
+                });
+        }
+
+        // Initialize App
+        function initApp() {
+            // Search
+            const searchInput = document.getElementById('searchInput');
+            const clearSearch = document.getElementById('clearSearch');
+            const searchSubmit = document.getElementById('searchSubmit');
+
+            let searchTimeout;
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    activeFilters.search = this.value.toLowerCase();
+                    if (this.value) {
+                        clearSearch.classList.add('visible');
+                        searchSubmit.classList.add('visible');
+                    } else {
+                        clearSearch.classList.remove('visible');
+                        searchSubmit.classList.remove('visible');
+                    }
+                    filterProducts();
+                }, 300);
+            });
+
+            clearSearch.addEventListener('click', function () {
+                searchInput.value = '';
+                activeFilters.search = '';
+                this.classList.remove('visible');
+                searchSubmit.classList.remove('visible');
+                filterProducts();
+            });
+
+            searchSubmit.addEventListener('click', function () {
+                activeFilters.search = searchInput.value.toLowerCase();
+                filterProducts();
+            });
+
+            searchInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    activeFilters.search = this.value.toLowerCase();
+                    filterProducts();
+                }
+            });
+
+            // Category buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    activeFilters.category = this.dataset.category;
+                    filterProducts();
+                });
+            });
+
+            // Filter chips
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.addEventListener('click', function () {
+                    const filterType = this.dataset.filter;
+                    const value = this.value;
+                    document.querySelectorAll(`.filter-chip[data-filter="${filterType}"]`).forEach(c => {
+                        c.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    activeFilters[filterType] = value;
+                });
+            });
+
+            // Price range
+            const minPriceInput = document.getElementById('minPrice');
+            const maxPriceInput = document.getElementById('maxPrice');
+            const rangeThumb = document.getElementById('rangeThumb');
+            const currentMaxPrice = document.getElementById('currentMaxPrice');
+
+            function updatePriceRange() {
+                const min = parseInt(minPriceInput.value) || 0;
+                const max = parseInt(maxPriceInput.value) || 10000;
+                activeFilters.minPrice = min;
+                activeFilters.maxPrice = max;
+                const percentage = (max / 10000) * 100;
+                rangeThumb.style.left = `${percentage}%`;
+                currentMaxPrice.textContent = max;
+            }
+
+            minPriceInput.addEventListener('input', updatePriceRange);
+            maxPriceInput.addEventListener('input', updatePriceRange);
+
+            // Range slider drag
+            let isDragging = false;
+            const rangeSlider = document.querySelector('.range-slider');
+
+            rangeThumb.addEventListener('mousedown', startDrag);
+            rangeThumb.addEventListener('touchstart', startDrag);
+
+            function startDrag(e) {
+                e.preventDefault();
+                isDragging = true;
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('touchmove', drag);
+                document.addEventListener('mouseup', stopDrag);
+                document.addEventListener('touchend', stopDrag);
+            }
+
+            function drag(e) {
+                if (!isDragging) return;
+                const sliderRect = rangeSlider.getBoundingClientRect();
+                let clientX;
+                if (e.type.includes('touch')) {
+                    clientX = e.touches[0].clientX;
+                } else {
+                    clientX = e.clientX;
+                }
+                let x = clientX - sliderRect.left;
+                x = Math.max(0, Math.min(x, sliderRect.width));
+                const percentage = (x / sliderRect.width) * 100;
+                const value = Math.round((percentage / 100) * 10000);
+                activeFilters.maxPrice = value;
+                maxPriceInput.value = value;
+                currentMaxPrice.textContent = value;
+                rangeThumb.style.left = `${percentage}%`;
+            }
+
+            function stopDrag() {
+                isDragging = false;
+                document.removeEventListener('mousemove', drag);
+                document.removeEventListener('touchmove', drag);
+                document.removeEventListener('mouseup', stopDrag);
+                document.removeEventListener('touchend', stopDrag);
+            }
+
+            // Review modal stars
+            document.querySelectorAll('.star-btn').forEach(star => {
+                star.addEventListener('click', function () {
+                    const rating = parseInt(this.dataset.rating);
+                    selectRating(rating);
+                });
+            });
+
+            // Review text character counter
+            const reviewText = document.getElementById('reviewText');
+            const charCount = document.getElementById('charCount');
+            
+            reviewText.addEventListener('input', function () {
+                charCount.textContent = this.value.length;
+            });
+        }
+
+        // Select rating in review modal
+        function selectRating(rating) {
+            selectedRating = rating;
+            const stars = document.querySelectorAll('.star-btn');
+            stars.forEach(star => {
+                const starRating = parseInt(star.dataset.rating);
+                if (starRating <= rating) {
+                    star.innerHTML = '<i class="fas fa-star"></i>';
+                    star.classList.add('active');
+                } else {
+                    star.innerHTML = '<i class="far fa-star"></i>';
+                    star.classList.remove('active');
+                }
+            });
+            
+            const ratingTexts = [
+                'Ужасно',
+                'Плохо',
+                'Нормально',
+                'Хорошо',
+                'Отлично'
+            ];
+            document.getElementById('selectedRatingText').textContent = ratingTexts[rating - 1];
+        }
+
+        // Open review modal
+        function openReviewModal() {
+            if (!currentUser) {
+                showToast('Войдите в систему, чтобы оставить отзыв', 'error');
+                return;
+            }
+            
+            if (!currentProduct) {
+                showToast('Ошибка: товар не найден', 'error');
+                return;
+            }
+            
+            // Check if user already left a review
+            const userReview = productReviews.find(review => review.userId === currentUser.uid);
+            if (userReview) {
+                showToast('Вы уже оставили отзыв на этот товар', 'info');
+                return;
+            }
+            
+            // Reset form
+            selectedRating = 0;
+            document.getElementById('reviewText').value = '';
+            document.getElementById('charCount').textContent = '0';
+            document.getElementById('reviewError').classList.remove('show');
+            
+            // Reset stars
+            const stars = document.querySelectorAll('.star-btn');
+            stars.forEach(star => {
+                star.innerHTML = '<i class="far fa-star"></i>';
+                star.classList.remove('active');
+            });
+            
+            document.getElementById('selectedRatingText').textContent = 'Нажмите на звезду, чтобы оценить';
+            
+            // Show modal
+            document.getElementById('reviewModal').classList.add('active');
+        }
+
+        // Close review modal
+        function closeReviewModal() {
+            document.getElementById('reviewModal').classList.remove('active');
+        }
+
+        // Submit review
+        function submitReview() {
+            if (!currentUser) {
+                showToast('Войдите в систему, чтобы оставить отзыв', 'error');
+                return;
+            }
+            
+            if (!currentProduct) {
+                showToast('Ошибка: товар не найден', 'error');
+                return;
+            }
+            
+            if (selectedRating === 0) {
+                document.getElementById('reviewError').textContent = 'Пожалуйста, выберите оценку';
+                document.getElementById('reviewError').classList.add('show');
+                return;
+            }
+            
+            const reviewText = document.getElementById('reviewText').value.trim();
+            if (reviewText.length < 10) {
+                document.getElementById('reviewError').textContent = 'Отзыв должен содержать минимум 10 символов';
+                document.getElementById('reviewError').classList.add('show');
+                return;
+            }
+            
+            if (reviewText.length > 1000) {
+                document.getElementById('reviewError').textContent = 'Отзыв не должен превышать 1000 символов';
+                document.getElementById('reviewError').classList.add('show');
+                return;
+            }
+            
+            // Check if user already left a review
+            const userReview = productReviews.find(review => review.userId === currentUser.uid);
+            if (userReview) {
+                showToast('Вы уже оставили отзыв на этот товар', 'info');
+                closeReviewModal();
+                return;
+            }
+            
+            // Create review object
+            const review = {
+                productId: currentProduct.id,
+                userId: currentUser.uid,
+                userName: currentUser.displayName || currentUser.email.split('@')[0],
+                userAvatar: currentUser.photoURL || null,
+                rating: selectedRating,
+                text: reviewText,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            // Save review to Firestore
+            db.collection('reviews').add(review)
+                .then(() => {
+                    showToast('Ваш отзыв успешно опубликован!', 'success');
+                    closeReviewModal();
+                    
+                    // Update product rating statistics
+                    updateProductRatingStats();
+                    
+                    // Reload reviews
+                    loadProductReviews(currentProduct.id);
+                })
+                .catch((error) => {
+                    console.error('Ошибка при сохранении отзыва:', error);
+                    showToast('Ошибка при сохранении отзыва', 'error');
+                });
+        }
+
+        // Update product rating statistics
+        function updateProductRatingStats() {
+            if (!currentProduct) return;
+            
+            // Calculate new average rating
+            const reviews = productReviews;
+            const newReview = {
+                rating: selectedRating
+            };
+            
+            // Add the new review temporarily for calculation
+            const allReviews = [...reviews, newReview];
+            const totalRating = allReviews.reduce((sum, review) => sum + review.rating, 0);
+            const averageRating = totalRating / allReviews.length;
+            
+            // Count ratings by star
+            const ratingCounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+            allReviews.forEach(review => {
+                ratingCounts[review.rating]++;
+            });
+            
+            // Update product in Firestore
+            db.collection('products').doc(currentProduct.id).update({
+                rating: parseFloat(averageRating.toFixed(1)),
+                reviews: allReviews.length,
+                ratingCounts: ratingCounts,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                console.log('Рейтинг товара обновлен');
+                
+                // Update current product data
+                currentProduct.rating = parseFloat(averageRating.toFixed(1));
+                currentProduct.reviews = allReviews.length;
+                
+                // Update product in local products array
+                const productIndex = products.findIndex(p => p.id === currentProduct.id);
+                if (productIndex !== -1) {
+                    products[productIndex].rating = currentProduct.rating;
+                    products[productIndex].reviews = currentProduct.reviews;
+                }
+                
+                // Update UI
+                updateProductRatingDisplay();
+                if (filteredProducts.some(p => p.id === currentProduct.id)) {
+                    renderProducts();
+                }
+            })
+            .catch((error) => {
+                console.error('Ошибка при обновлении рейтинга товара:', error);
+            });
+        }
+
+        // Update product rating display
+        function updateProductRatingDisplay() {
+            if (!currentProduct) return;
+            
+            const detailRating = document.getElementById('detailRating');
+            if (detailRating) {
+                detailRating.textContent = currentProduct.rating;
+            }
+            
+            updateAverageRatingDisplay();
+        }
+
+        // Update average rating display
+        function updateAverageRatingDisplay() {
+            if (!productReviewStats) return;
+            
+            const averageRatingValue = document.getElementById('averageRatingValue');
+            const averageRatingStars = document.getElementById('averageRatingStars');
+            const averageRatingText = document.getElementById('averageRatingText');
+            const ratingBars = document.getElementById('ratingBars');
+            
+            if (averageRatingValue) {
+                averageRatingValue.textContent = productReviewStats.averageRating.toFixed(1);
+            }
+            
+            if (averageRatingStars) {
+                averageRatingStars.innerHTML = getStars(productReviewStats.averageRating);
+            }
+            
+            if (averageRatingText) {
+                const reviewCount = productReviews.length;
+                const word = getReviewWord(reviewCount);
+                averageRatingText.textContent = `${reviewCount} ${word}`;
+            }
+            
+            if (ratingBars) {
+                ratingBars.innerHTML = '';
+                
+                // Create rating bars for each star rating
+                for (let i = 5; i >= 1; i--) {
+                    const count = productReviewStats.ratingCounts[i] || 0;
+                    const percentage = productReviews.length > 0 ? (count / productReviews.length) * 100 : 0;
+                    
+                    const ratingBar = document.createElement('div');
+                    ratingBar.className = 'rating-bar';
+                    ratingBar.innerHTML = `
+                        <span class="rating-bar-label">${i} <i class="fas fa-star"></i></span>
+                        <div class="rating-bar-progress">
+                            <div class="rating-bar-fill" style="width: ${percentage}%"></div>
+                        </div>
+                        <span class="rating-bar-count">${count}</span>
+                    `;
+                    ratingBars.appendChild(ratingBar);
+                }
+            }
+        }
+
+        // Get correct word form for review count
+        function getReviewWord(count) {
+            if (count % 10 === 1 && count % 100 !== 11) return 'отзыв';
+            if (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)) return 'отзыва';
+            return 'отзывов';
+        }
+
+        // Load product reviews
+        function loadProductReviews(productId) {
+            productReviews = [];
+            productReviewStats = null;
+            
+            // Listen for reviews in real-time
+            db.collection('reviews')
+                .where('productId', '==', productId)
+                .orderBy('createdAt', 'desc')
+                .onSnapshot((snapshot) => {
+                    productReviews = [];
+                    snapshot.forEach(doc => {
+                        const review = doc.data();
+                        review.id = doc.id;
+                        // Convert Firestore timestamp to Date
+                        if (review.createdAt && review.createdAt.toDate) {
+                            review.createdAt = review.createdAt.toDate();
+                        }
+                        if (review.updatedAt && review.updatedAt.toDate) {
+                            review.updatedAt = review.updatedAt.toDate();
+                        }
+                        productReviews.push(review);
+                    });
+                    
+                    // Calculate review statistics
+                    calculateReviewStats();
+                    
+                    // Update UI
+                    updateReviewsList();
+                    updateAverageRatingDisplay();
+                }, (error) => {
+                    console.error('Ошибка загрузки отзывов:', error);
+                });
+        }
+
+        // Calculate review statistics
+        function calculateReviewStats() {
+            if (productReviews.length === 0) {
+                productReviewStats = {
+                    averageRating: 0,
+                    ratingCounts: {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+                };
+                return;
+            }
+            
+            const totalRating = productReviews.reduce((sum, review) => sum + review.rating, 0);
+            const averageRating = totalRating / productReviews.length;
+            
+            const ratingCounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+            productReviews.forEach(review => {
+                ratingCounts[review.rating]++;
+            });
+            
+            productReviewStats = {
+                averageRating: averageRating,
+                ratingCounts: ratingCounts
+            };
+        }
+
+        // Update reviews list
+        function updateReviewsList() {
+            const reviewsList = document.getElementById('reviewsList');
+            const noReviews = document.getElementById('noReviews');
+            
+            if (!reviewsList || !noReviews) return;
+            
+            if (productReviews.length === 0) {
+                noReviews.style.display = 'block';
+                // Clear existing reviews
+                const existingReviews = reviewsList.querySelectorAll('.review-item');
+                existingReviews.forEach(review => review.remove());
+                return;
+            }
+            
+            noReviews.style.display = 'none';
+            
+            // Clear existing reviews
+            const existingReviews = reviewsList.querySelectorAll('.review-item');
+            existingReviews.forEach(review => review.remove());
+            
+            // Add new reviews
+            productReviews.forEach(review => {
+                const reviewItem = document.createElement('div');
+                reviewItem.className = 'review-item';
+                
+                // Format date
+                const date = review.createdAt ? formatDate(review.createdAt) : 'Недавно';
+                
+                // Get user avatar initials
+                let avatarText = 'П';
+                if (review.userName) {
+                    avatarText = review.userName.charAt(0).toUpperCase();
+                } else if (review.userId) {
+                    avatarText = review.userId.charAt(0).toUpperCase();
+                }
+                
+                reviewItem.innerHTML = `
+                    <div class="review-header">
+                        <div class="review-avatar">
+                            ${avatarText}
+                        </div>
+                        <div class="review-user">
+                            <div class="review-user-name">${review.userName || 'Пользователь'}</div>
+                            <div class="review-date">${date}</div>
+                        </div>
+                        <div class="review-rating">
+                            ${getStars(review.rating)}
+                        </div>
+                    </div>
+                    <div class="review-text">
+                        ${escapeHtml(review.text)}
+                    </div>
+                    <div class="review-footer">
+                        <div class="review-helpful">
+                            <i class="far fa-thumbs-up"></i> Полезно
+                        </div>
+                        ${review.userId === currentUser?.uid ? '<div class="review-own">Ваш отзыв</div>' : ''}
+                    </div>
+                `;
+                
+                reviewsList.appendChild(reviewItem);
+            });
+        }
+
+        // Format date
+        function formatDate(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            if (diffMins < 1) return 'Только что';
+            if (diffMins < 60) return `${diffMins} мин. назад`;
+            if (diffHours < 24) return `${diffHours} ч. назад`;
+            if (diffDays === 1) return 'Вчера';
+            if (diffDays < 7) return `${diffDays} дн. назад`;
+            
+            return date.toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+
+        // Toggle Favorite
+        function toggleFavorite(event, productId) {
+            event.stopPropagation();
+
+            if (!currentUser) {
+                showToast('Войдите в систему, чтобы добавлять товары в избранное');
+                return;
+            }
+
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const favoriteRef = database.ref('users/' + currentUser.uid + '/favorites');
+            const isFavorite = userFavorites.includes(productId);
+            const btn = event.target.closest('.favorite-btn');
+
+            if (isFavorite) {
+                favoriteRef.orderByChild('productId').equalTo(productId).once('value')
+                    .then((snapshot) => {
+                        if (snapshot.exists()) {
+                            snapshot.forEach((childSnapshot) => {
+                                childSnapshot.ref.remove();
+                            });
+                            const index = userFavorites.indexOf(productId);
+                            if (index > -1) {
+                                userFavorites.splice(index, 1);
+                            }
+                            btn.classList.remove('active');
+                            updateFavoritesBadge();
+                            showToast(`${product.name} удален из избранного`, 'info');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Ошибка удаления из избранного:', error);
+                        showToast('Ошибка при удалении из избранного', 'error');
+                    });
+            } else {
+                const newFavoriteRef = favoriteRef.push();
+                newFavoriteRef.set({
+                    productId: product.id,
+                    name: product.name,
+                    desc: product.description,
+                    price: product.price,
+                    oldPrice: product.oldPrice,
+                    image: product.image,
+                    category: product.category,
+                    brand: product.brand,
+                    rating: product.rating,
+                    reviews: product.reviews,
+                    dateAdded: Date.now()
+                })
+                    .then(() => {
+                        userFavorites.push(productId);
+                        btn.classList.add('active');
+                        updateFavoritesBadge();
+                        showToast(`${product.name} добавлен в избранное`, 'success');
+                    })
+                    .catch((error) => {
+                        console.error('Ошибка добавления в избранное:', error);
+                        showToast('Ошибка при добавлении в избранное', 'error');
+                    });
+            }
+        }
+
+        // Load products from Firebase
+        async function loadProducts() {
+            try {
+                const snapshot = await db.collection('products').get();
+                products = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    products.push({
+                        id: doc.id,
+                        name: data.name || 'Без названия',
+                        category: data.category || 'other',
+                        brand: data.brand || 'other',
+                        skinType: data.skinType || [],
+                        price: data.price || 0,
+                        oldPrice: data.oldPrice || null,
+                        image: data.image || 'https://images.unsplash.com/photo-1556228578-9c360e1d8d34?w=400&h=400&fit=crop',
+                        images: data.images || [data.image || 'https://images.unsplash.com/photo-1556228578-9c360e1d8d34?w=400&h=400&fit=crop'],
+                        rating: data.rating || 0,
+                        reviews: data.reviews || 0,
+                        sales: data.sales || 0,
+                        description: data.description || 'Описание отсутствует',
+                        volume: data.volume || '50 мл',
+                        country: data.country || 'Не указано',
+                        new: data.new || false,
+                        popular: data.popular || false,
+                        inStock: data.inStock !== false
+                    });
+                });
+
+                if (products.length === 0) {
+                    await createDemoProducts();
+                    await loadProducts();
+                    return;
+                }
+
+                filteredProducts = [...products];
+                renderProducts();
+
+            } catch (error) {
+                console.error('Ошибка загрузки товаров:', error);
+                showToast('Ошибка загрузки товаров', 'error');
+            }
+        }
+
+        // Create demo products if empty
+        async function createDemoProducts() {
+            const demoProducts = [
+                {
+                    name: "Увлажняющий крем для лица с гиалуроновой кислотой",
+                    category: "face",
+                    brand: "la_roche",
+                    skinType: ["normal", "dry"],
+                    price: 1890,
+                    oldPrice: 2190,
+                    image: "https://images.unsplash.com/photo-1556228578-9c360e1d8d34?w=800&q=80",
+                    images: [
+                        "https://images.unsplash.com/photo-1556228578-9c360e1d8d34?w=800&q=80",
+                        "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&q=80"
+                    ],
+                    rating: 4.8,
+                    reviews: 142,
+                    sales: 125,
+                    description: "Интенсивное увлажнение на 24 часа. Формула с гиалуроновой кислотой и витамином Е восстанавливает гидролипидный барьер кожи.",
+                    volume: "50 мл",
+                    country: "Франция",
+                    new: true,
+                    popular: true,
+                    inStock: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                {
+                    name: "Очищающий гель для умывания",
+                    category: "face",
+                    brand: "cerave",
+                    skinType: ["oily", "sensitive"],
+                    price: 890,
+                    oldPrice: 990,
+                    image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&q=80",
+                    images: [
+                        "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&q=80",
+                        "https://images.unsplash.com/photo-1556228578-9c360e1d8d34?w=800&q=80"
+                    ],
+                    rating: 4.6,
+                    reviews: 89,
+                    sales: 78,
+                    description: "Мягкое очищение без пересушивания. Подходит для ежедневного использования, не нарушает pH баланс кожи.",
+                    volume: "236 мл",
+                    country: "США",
+                    new: false,
+                    popular: true,
+                    inStock: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                {
+                    name: "Сыворотка с витамином C 23%",
+                    category: "face",
+                    brand: "ordinary",
+                    skinType: ["normal", "dry", "sensitive"],
+                    price: 1290,
+                    oldPrice: 1490,
+                    image: "https://images.unsplash.com/photo-1556228579-35f4f61c3a6b?w=800&q=80",
+                    images: [
+                        "https://images.unsplash.com/photo-1556228579-35f4f61c3a6b?w=800&q=80"
+                    ],
+                    rating: 4.7,
+                    reviews: 215,
+                    sales: 189,
+                    description: "Мощная антиоксидантная защита и осветление пигментных пятен. Высокая концентрация чистого витамина C.",
+                    volume: "30 мл",
+                    country: "Канада",
+                    new: true,
+                    popular: true,
+                    inStock: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                {
+                    name: "Солнцезащитный крем SPF 50+",
+                    category: "sunscreen",
+                    brand: "avene",
+                    skinType: ["normal", "sensitive"],
+                    price: 1490,
+                    oldPrice: 1790,
+                    image: "https://images.unsplash.com/photo-1556228578-9c360e1d8d34?w=800&q=80",
+                    images: [
+                        "https://images.unsplash.com/photo-1556228578-9c360e1d8d34?w=800&q=80"
+                    ],
+                    rating: 4.9,
+                    reviews: 312,
+                    sales: 278,
+                    description: "Широкий спектр защиты UVA/UVB. Нежирная текстура, подходит для чувствительной кожи.",
+                    volume: "50 мл",
+                    country: "Франция",
+                    new: false,
+                    popular: true,
+                    inStock: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                {
+                    name: "Шампунь для объема волос",
+                    category: "hair",
+                    brand: "cerave",
+                    skinType: ["all"],
+                    price: 790,
+                    oldPrice: 890,
+                    image: "https://images.unsplash.com/photo-1556228578-9c360e1d8d34?w=800&q=80",
+                    images: [
+                        "https://images.unsplash.com/photo-1556228578-9c360e1d8d34?w=800&q=80"
+                    ],
+                    rating: 4.5,
+                    reviews: 67,
+                    sales: 54,
+                    description: "Обогащен кератином и протеинами для укрепления и объема волос. Без сульфатов.",
+                    volume: "400 мл",
+                    country: "США",
+                    new: false,
+                    popular: true,
+                    inStock: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                {
+                    name: "Увлажняющее молочко для тела",
+                    category: "body",
+                    brand: "la_roche",
+                    skinType: ["dry", "sensitive"],
+                    price: 1290,
+                    oldPrice: null,
+                    image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&q=80",
+                    images: [
+                        "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&q=80"
+                    ],
+                    rating: 4.6,
+                    reviews: 98,
+                    sales: 76,
+                    description: "Легкая текстура для ежедневного увлажнения. Быстро впитывается, не оставляет жирного блеска.",
+                    volume: "250 мл",
+                    country: "Франция",
+                    new: true,
+                    popular: false,
+                    inStock: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }
+            ];
+
+            try {
+                for (const product of demoProducts) {
+                    await db.collection('products').add(product);
+                }
+            } catch (error) {
+                console.error('Ошибка создания демо-товаров:', error);
+            }
+        }
+
+        // Render products
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            if (filteredProducts.length === 0) {
+                grid.innerHTML = '';
+                emptyState.style.display = 'flex';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            grid.innerHTML = filteredProducts.map(product => {
+                const isFavorite = userFavorites.includes(product.id);
+                const inCart = cart.some(item => item.id === product.id);
+
+                return `
+                    <div class="product-card will-change" onclick="showProductDetail('${product.id}')">
+                        <div class="product-badges">
+                            ${product.new ? '<span class="badge-new">NEW</span>' : ''}
+                            ${product.oldPrice ? '<span class="badge-sale">SALE</span>' : ''}
+                        </div>
+                        
+                        <button class="favorite-btn ${isFavorite ? 'active' : ''}" 
+                                onclick="toggleFavorite(event, '${product.id}')">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        
+                        <div class="product-image">
+                            <img src="${product.image}" alt="${product.name}" 
+                                 loading="lazy"
+                                 onerror="this.src='https://images.unsplash.com/photo-1556228578-9c360e1d8d34?w=800&q=80'">
+                        </div>
+                        
+                        <div class="product-info">
+                            <div class="product-category">
+                                <i class="fas fa-tag"></i> ${getCategoryName(product.category)}
+                            </div>
+                            <h3 class="product-title">${product.name}</h3>
+                            <div class="product-rating">
+                                <div class="stars">
+                                    ${getStars(product.rating)}
+                                </div>
+                                <span class="rating-value">${product.rating.toFixed(1)}</span>
+                                <span class="rating-count">(${product.reviews})</span>
+                            </div>
+                            <div class="product-price">
+                                <span class="current-price">${formatPrice(product.price)} ₽</span>
+                                ${product.oldPrice ? `<span class="old-price">${formatPrice(product.oldPrice)} ₽</span>` : ''}
+                            </div>
+                            <button class="add-to-cart ${inCart ? 'added' : ''}" 
+                                    onclick="toggleCart(event, '${product.id}')">
+                                <i class="fas fa-shopping-cart"></i>
+                                ${inCart ? 'В корзине' : 'В корзину'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Helper functions
+        function getCategoryName(category) {
+            const categories = {
+                'face': 'Лицо',
+                'body': 'Тело',
+                'hair': 'Волосы',
+                'sunscreen': 'Защита',
+                'other': 'Другое'
+            };
+            return categories[category] || category;
+        }
+
+        function getBrandName(brand) {
+            const brands = {
+                'la_roche': 'La Roche-Posay',
+                'cerave': 'CeraVe',
+                'ordinary': 'The Ordinary',
+                'avene': 'Avene',
+                'other': 'Другой'
+            };
+            return brands[brand] || brand;
+        }
+
+        function getSkinTypeName(skinType) {
+            const types = {
+                'normal': 'Нормальная',
+                'dry': 'Сухая',
+                'oily': 'Жирная',
+                'sensitive': 'Чувствительная',
+                'all': 'Любой'
+            };
+            if (Array.isArray(skinType)) {
+                return skinType.map(t => types[t] || t).join(', ');
+            }
+            return types[skinType] || skinType;
+        }
+
+        function getStars(rating) {
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5;
+            let stars = '';
+
+            for (let i = 0; i < 5; i++) {
+                if (i < fullStars) {
+                    stars += '<i class="fas fa-star"></i>';
+                } else if (i === fullStars && halfStar) {
+                    stars += '<i class="fas fa-star-half-alt"></i>';
+                } else {
+                    stars += '<i class="far fa-star"></i>';
+                }
+            }
+            return stars;
+        }
+
+        function formatPrice(price) {
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Filter products
+        function filterProducts() {
+            filteredProducts = products.filter(product => {
+                // Search
+                if (activeFilters.search) {
+                    const searchTerm = activeFilters.search.toLowerCase();
+                    if (!product.name.toLowerCase().includes(searchTerm) &&
+                        !product.description.toLowerCase().includes(searchTerm) &&
+                        !getCategoryName(product.category).toLowerCase().includes(searchTerm)) {
+                        return false;
+                    }
+                }
+
+                // Category
+                if (activeFilters.category !== 'all' && product.category !== activeFilters.category) {
+                    return false;
+                }
+
+                // Skin type
+                if (activeFilters.skinType !== 'all') {
+                    if (Array.isArray(product.skinType)) {
+                        if (!product.skinType.includes(activeFilters.skinType)) return false;
+                    } else if (product.skinType !== activeFilters.skinType) {
+                        return false;
+                    }
+                }
+
+                // Brand
+                if (activeFilters.brand !== 'all' && product.brand !== activeFilters.brand) {
+                    return false;
+                }
+
+                // Price
+                if (product.price < activeFilters.minPrice || product.price > activeFilters.maxPrice) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            renderProducts();
+        }
+
+        // Show filters panel
+        function showFilters() {
+            document.getElementById('filtersPanel').classList.add('active');
+        }
+
+        // Close filters panel
+        function closeFilters() {
+            document.getElementById('filtersPanel').classList.remove('active');
+        }
+
+        // Apply filters
+        function applyFilters() {
+            filterProducts();
+            closeFilters();
+            showToast('Фильтры применены', 'success');
+        }
+
+        // Clear all filters
+        function clearFilters() {
+            activeFilters = {
+                category: 'all',
+                skinType: 'all',
+                brand: 'all',
+                minPrice: 0,
+                maxPrice: 10000,
+                search: ''
+            };
+
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearch').classList.remove('visible');
+            document.getElementById('searchSubmit').classList.remove('visible');
+            document.getElementById('minPrice').value = '';
+            document.getElementById('maxPrice').value = '10000';
+
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector('.category-btn[data-category="all"]').classList.add('active');
+
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+                if (chip.value === 'all') {
+                    chip.classList.add('active');
+                }
+            });
+
+            filterProducts();
+            showToast('Фильтры сброшены', 'info');
+        }
+
+        // Toggle cart
+        function toggleCart(event, productId) {
+            event.stopPropagation();
+
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingIndex = cart.findIndex(item => item.id === productId);
+            const btn = event.target.closest('.add-to-cart');
+
+            if (existingIndex === -1) {
+                cart.push({
+                    ...product,
+                    quantity: 1
+                });
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCartBadge();
+
+                if (btn) {
+                    btn.classList.add('added');
+                    btn.innerHTML = '<i class="fas fa-shopping-cart"></i> В корзине';
+                }
+
+                showToast('Товар добавлен в корзину', 'success');
+            } else {
+                cart.splice(existingIndex, 1);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCartBadge();
+
+                if (btn) {
+                    btn.classList.remove('added');
+                    btn.innerHTML = '<i class="fas fa-shopping-cart"></i> В корзину';
+                }
+
+                showToast('Товар удален из корзины', 'info');
+            }
+        }
+
+        // Toggle cart from detail
+        function toggleCartFromDetail() {
+            if (!currentProduct) return;
+
+            const existingIndex = cart.findIndex(item => item.id === currentProduct.id);
+            const cartBtn = document.getElementById('detailCartBtn');
+
+            if (existingIndex === -1) {
+                cart.push({
+                    ...currentProduct,
+                    quantity: 1
+                });
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCartBadge();
+
+                cartBtn.innerHTML = '<i class="fas fa-check"></i>';
+                cartBtn.classList.add('added');
+
+                showToast('Товар добавлен в корзину', 'success');
+            } else {
+                cart.splice(existingIndex, 1);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCartBadge();
+
+                cartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i>';
+                cartBtn.classList.remove('added');
+
+                showToast('Товар удален из корзины', 'info');
+            }
+        }
+
+        // Show product detail
+        async function showProductDetail(productId) {
+            try {
+                const detailTitle = document.getElementById('detailTitle');
+                detailTitle.textContent = 'Загрузка...';
+                
+                // Find product in local cache
+                const product = products.find(p => p.id === productId);
+                if (product) {
+                    currentProduct = product;
+                    fillProductDetail(currentProduct);
+                    
+                    // Load reviews for this product
+                    loadProductReviews(productId);
+                    
+                    document.getElementById('productDetail').classList.add('active');
+                } else {
+                    // Load from Firestore
+                    const doc = await db.collection('products').doc(productId).get();
+                    
+                    if (doc.exists) {
+                        const data = doc.data();
+                        currentProduct = {
+                            id: doc.id,
+                            name: data.name || 'Товар',
+                            category: data.category || 'other',
+                            brand: data.brand || 'other',
+                            skinType: data.skinType || [],
+                            price: data.price || 0,
+                            oldPrice: data.oldPrice || null,
+                            image: data.image || 'https://images.unsplash.com/photo-1556228578-9c360e1d8d34?w=400&h=400&fit=crop',
+                            images: data.images || [data.image || 'https://images.unsplash.com/photo-1556228578-9c360e1d8d34?w=400&h=400&fit=crop'],
+                            rating: data.rating || 0,
+                            reviews: data.reviews || 0,
+                            sales: data.sales || 0,
+                            description: data.description || 'Описание отсутствует',
+                            volume: data.volume || '50 мл',
+                            country: data.country || 'Не указано',
+                            inStock: data.inStock !== false
+                        };
+                        
+                        fillProductDetail(currentProduct);
+                        
+                        // Load reviews for this product
+                        loadProductReviews(productId);
+                        
+                        document.getElementById('productDetail').classList.add('active');
+                    } else {
+                        showToast('Товар не найден', 'error');
+                        return;
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Ошибка загрузки товара:', error);
+                showToast('Ошибка загрузки товара', 'error');
+            }
+        }
+
+        // Fill product detail
+        function fillProductDetail(product) {
+            document.getElementById('detailTitle').textContent = product.name;
+            document.getElementById('detailCategory').textContent = getCategoryName(product.category);
+            document.getElementById('detailRating').textContent = product.rating.toFixed(1);
+            document.getElementById('detailSales').textContent = product.sales + ' купили';
+            document.getElementById('detailCurrentPrice').textContent = formatPrice(product.price) + ' ₽';
+            document.getElementById('detailOldPrice').textContent = product.oldPrice ? formatPrice(product.oldPrice) + ' ₽' : '';
+            document.getElementById('detailDescription').textContent = product.description;
+            document.getElementById('specBrand').textContent = getBrandName(product.brand);
+            document.getElementById('specSkinType').textContent = getSkinTypeName(product.skinType);
+            document.getElementById('specVolume').textContent = product.volume;
+            document.getElementById('specCountry').textContent = product.country;
+
+            // Images slider
+            const slider = document.getElementById('imageSlider');
+            const controls = document.getElementById('sliderControls');
+            slider.innerHTML = '';
+            controls.innerHTML = '';
+
+            product.images.forEach((img, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'image-slide';
+                slide.innerHTML = `<img src="${img}" alt="${product.name} ${index + 1}" loading="lazy">`;
+                slider.appendChild(slide);
+
+                const dot = document.createElement('button');
+                dot.className = `slider-dot ${index === 0 ? 'active' : ''}`;
+                dot.onclick = () => goToSlide(index);
+                controls.appendChild(dot);
+            });
+
+            // Cart button state
+            const inCart = cart.some(item => item.id === product.id);
+            const cartBtn = document.getElementById('detailCartBtn');
+            if (inCart) {
+                cartBtn.innerHTML = '<i class="fas fa-check"></i>';
+                cartBtn.classList.add('added');
+            } else {
+                cartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i>';
+                cartBtn.classList.remove('added');
+            }
+            
+            // Show/hide add review button based on auth
+            const addReviewBtn = document.getElementById('addReviewBtn');
+            if (currentUser) {
+                addReviewBtn.style.display = 'flex';
+            } else {
+                addReviewBtn.style.display = 'none';
+            }
+        }
+
+        // Close product detail
+        function closeProductDetail() {
+            document.getElementById('productDetail').classList.remove('active');
+        }
+
+        // Go to slide
+        function goToSlide(index) {
+            const slides = document.querySelectorAll('.image-slide');
+            const dots = document.querySelectorAll('.slider-dot');
+            const slider = document.getElementById('imageSlider');
+
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+
+            slides[index].classList.add('active');
+            dots[index].classList.add('active');
+            slider.style.transform = `translateX(-${index * 100}%)`;
+        }
+
+        // Buy now
+        function buyNow() {
+            if (!currentProduct) return;
+
+            const existingIndex = cart.findIndex(item => item.id === currentProduct.id);
+            if (existingIndex === -1) {
+                cart.push({
+                    ...currentProduct,
+                    quantity: 1
+                });
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCartBadge();
+            }
+
+            setTimeout(() => {
+                window.location.href = 'cart.html';
+            }, 500);
+        }
+
+        // Update cart badge
+        function updateCartBadge() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cartTabBadge');
+
+            badge.textContent = totalItems;
+
+            if (totalItems > 0) {
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // Update favorites badge
+        function updateFavoritesBadge() {
+            const totalFavorites = userFavorites.length;
+            const badge = document.getElementById('favoritesTabBadge');
+
+            badge.textContent = totalFavorites;
+
+            if (totalFavorites > 0) {
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // Show toast
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

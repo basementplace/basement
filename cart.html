@@ -1,0 +1,2653 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Basement | Корзина</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --ozon-blue: #005BFF;
+            --ozon-blue-dark: #004ECC;
+            --ozon-gray-10: #1A1A1A;
+            --ozon-gray-20: #2C2C2E;
+            --ozon-gray-30: #3C3C3E;
+            --ozon-gray-40: #48484A;
+            --ozon-gray-50: #8E8E93;
+            --ozon-white: #FFFFFF;
+            --glass-bg: rgba(44, 44, 46, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --success-green: #34C759;
+            --error-red: #FF3B30;
+            --warning-yellow: #FF9500;
+            --tinkoff-yellow: #FFDD2D;
+            --vtb-blue: #1F3C88;
+            --alpha-green: #FF3B30;
+            --favorite-pink: #FF2D55;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
+            color: var(--ozon-white);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(0, 91, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 153, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 0 16px 120px;
+        }
+
+        .header {
+            padding: 20px 0 16px;
+            margin-bottom: 4px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 10px;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            color: var(--ozon-white);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 12px 16px;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(44, 44, 46, 0.9);
+            border-color: var(--ozon-blue);
+            transform: translateY(-2px);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cart-items {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .cart-item {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            animation: scaleIn 0.4s ease-out;
+            position: relative;
+        }
+
+        .item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .item-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--ozon-white);
+            margin-bottom: 12px;
+        }
+
+        .item-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .quantity-btn {
+            width: 32px;
+            height: 32px;
+            background: var(--ozon-gray-30);
+            border: 1px solid var(--ozon-gray-40);
+            border-radius: 8px;
+            color: var(--ozon-white);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .quantity-btn:active {
+            transform: scale(0.95);
+            background: var(--ozon-gray-40);
+        }
+
+        .quantity {
+            font-size: 18px;
+            font-weight: 600;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #FF3B30;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+            transition: transform 0.2s ease;
+        }
+
+        .remove-btn:active {
+            transform: scale(0.95);
+        }
+
+        .favorite-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ozon-white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 2;
+        }
+
+        .favorite-btn:hover {
+            background: rgba(255, 45, 85, 0.2);
+            color: var(--favorite-pink);
+        }
+
+        .favorite-btn.active {
+            background: var(--favorite-pink);
+            color: white;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-cart i {
+            font-size: 64px;
+            color: var(--ozon-gray-30);
+            margin-bottom: 24px;
+            opacity: 0.5;
+        }
+
+        .empty-cart h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .empty-cart p {
+            color: var(--ozon-gray-50);
+            margin-bottom: 24px;
+        }
+
+        .cart-summary {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-top: 1px solid var(--glass-border);
+            padding: 16px;
+            max-width: 500px;
+            margin: 0 auto;
+            z-index: 100;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .total-label {
+            font-size: 16px;
+            color: var(--ozon-gray-50);
+        }
+
+        .total-amount {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--ozon-white);
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--ozon-blue);
+            border: none;
+            border-radius: 12px;
+            color: var(--ozon-white);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkout-btn:hover {
+            background: var(--ozon-blue-dark);
+            transform: translateY(-2px);
+        }
+
+        .checkout-btn:disabled {
+            background: var(--ozon-gray-30);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Стили для вкладки "Недавно просмотренных" */
+        .recently-viewed-section {
+            margin-top: 24px;
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .clear-history-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            color: var(--ozon-gray-50);
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .clear-history-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--ozon-white);
+        }
+
+        .recently-viewed-items {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 4px 0 16px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--ozon-gray-40) var(--ozon-gray-20);
+        }
+
+        .recently-viewed-items::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .recently-viewed-items::-webkit-scrollbar-track {
+            background: var(--ozon-gray-20);
+            border-radius: 3px;
+        }
+
+        .recently-viewed-items::-webkit-scrollbar-thumb {
+            background: var(--ozon-gray-40);
+            border-radius: 3px;
+        }
+
+        .recently-viewed-items::-webkit-scrollbar-thumb:hover {
+            background: var(--ozon-gray-50);
+        }
+
+        .recent-item {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px;
+            min-width: 140px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .recent-item:hover {
+            transform: translateY(-4px);
+            border-color: var(--ozon-blue);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .recent-item-image {
+            width: 100%;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .recent-item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .recent-item-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .recent-item-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--ozon-white);
+            margin-bottom: 12px;
+        }
+
+        .recent-item-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-to-cart-btn {
+            background: var(--ozon-blue);
+            border: none;
+            color: white;
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .add-to-cart-btn:hover {
+            background: var(--ozon-blue-dark);
+        }
+
+        .recent-favorite-btn {
+            background: none;
+            border: 1px solid var(--glass-border);
+            color: var(--ozon-white);
+            font-size: 12px;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .recent-favorite-btn:hover {
+            border-color: var(--favorite-pink);
+            color: var(--favorite-pink);
+        }
+
+        .recent-favorite-btn.active {
+            background: var(--favorite-pink);
+            border-color: var(--favorite-pink);
+            color: white;
+        }
+
+        .empty-recently-viewed {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--glass-bg);
+            border: 1px dashed var(--glass-border);
+            border-radius: 16px;
+        }
+
+        .empty-recently-viewed i {
+            font-size: 48px;
+            color: var(--ozon-gray-30);
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-recently-viewed p {
+            color: var(--ozon-gray-50);
+            margin-bottom: 16px;
+        }
+
+        .empty-recently-viewed .checkout-btn {
+            max-width: 200px;
+            margin: 0 auto;
+        }
+
+        .auth-banner {
+            background: linear-gradient(135deg, var(--ozon-blue) 0%, #0066FF 100%);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 70px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .auth-banner h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .auth-banner p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 12px;
+        }
+
+        .auth-btn {
+            background: var(--ozon-white);
+            color: var(--ozon-blue);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .auth-btn:hover {
+            background: #f0f0f0;
+            transform: translateY(-1px);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--ozon-gray-50);
+        }
+
+        .loading i {
+            font-size: 32px;
+            margin-bottom: 16px;
+            animation: spin 1s linear infinite;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--ozon-gray-20);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--ozon-gray-50);
+            font-size: 20px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .close-modal:hover {
+            background: var(--ozon-gray-30);
+            color: var(--ozon-white);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--ozon-gray-50);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px;
+            background: var(--ozon-gray-30);
+            border: 1px solid var(--ozon-gray-40);
+            border-radius: 12px;
+            color: var(--ozon-white);
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--ozon-blue);
+            background: var(--ozon-gray-40);
+        }
+
+        .address-note {
+            font-size: 12px;
+            color: var(--warning-yellow);
+            margin-top: 4px;
+            margin-bottom: 15px;
+            padding: 8px 12px;
+            background: rgba(255, 149, 0, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid var(--warning-yellow);
+        }
+
+        .phone-input-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .phone-code {
+            min-width: 60px;
+            padding: 14px;
+            background: var(--ozon-gray-30);
+            border: 1px solid var(--ozon-gray-40);
+            border-radius: 12px;
+            color: var(--ozon-white);
+            text-align: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .phone-number {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .payment-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .payment-method {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--ozon-gray-30);
+            border: 1px solid var(--ozon-gray-40);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .payment-method:hover {
+            background: var(--ozon-gray-40);
+            transform: translateY(-2px);
+        }
+
+        .payment-method.selected {
+            border-color: var(--ozon-blue);
+            background: rgba(0, 91, 255, 0.1);
+        }
+
+        .payment-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .payment-cash .payment-icon {
+            background: linear-gradient(135deg, #34C759, #30D158);
+        }
+
+        .payment-vtb .payment-icon {
+            background: linear-gradient(135deg, var(--vtb-blue), #2A4A9C);
+        }
+
+        .payment-alpha .payment-icon {
+            background: linear-gradient(135deg, var(--alpha-green), #FF6666);
+        }
+
+        .payment-online .payment-icon {
+            background: linear-gradient(135deg, #5856D6, #5E5CE6);
+        }
+
+        .payment-tinkoff .payment-icon {
+            background: linear-gradient(135deg, var(--tinkoff-yellow), #FFD600);
+            color: #000;
+        }
+
+        .payment-info {
+            flex: 1;
+        }
+
+        .payment-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .payment-desc {
+            font-size: 14px;
+            color: var(--ozon-gray-50);
+        }
+
+        .payment-radio {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--ozon-gray-50);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .payment-radio::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: var(--ozon-blue);
+            border-radius: 50%;
+            display: none;
+        }
+
+        .payment-method.selected .payment-radio::after {
+            display: block;
+        }
+
+        .bank-payment-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            padding: 20px;
+        }
+
+        .bank-payment-content {
+            background: var(--ozon-gray-20);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            overflow: hidden;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        .bank-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+            position: relative;
+        }
+
+        .bank-back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--ozon-white);
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .bank-title {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .bank-body {
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .bank-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .bank-tinkoff .bank-logo {
+            background: var(--tinkoff-yellow);
+            color: #000;
+        }
+
+        .bank-vtb .bank-logo {
+            background: var(--vtb-blue);
+            color: white;
+        }
+
+        .bank-alpha .bank-logo {
+            background: var(--alpha-green);
+            color: white;
+        }
+
+        .bank-amount {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 20px 0;
+        }
+
+        .bank-instruction {
+            background: var(--ozon-gray-30);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 20px 0;
+            text-align: left;
+            font-size: 14px;
+            color: var(--ozon-gray-50);
+        }
+
+        .bank-instruction ol {
+            margin-left: 20px;
+        }
+
+        .bank-instruction li {
+            margin-bottom: 8px;
+        }
+
+        .bank-payment-btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .bank-tinkoff .bank-payment-btn {
+            background: linear-gradient(135deg, var(--tinkoff-yellow), #FFD600);
+            color: #000;
+        }
+
+        .bank-vtb .bank-payment-btn {
+            background: linear-gradient(135deg, var(--vtb-blue), #2A4A9C);
+        }
+
+        .bank-alpha .bank-payment-btn {
+            background: linear-gradient(135deg, var(--alpha-green), #FF6666);
+        }
+
+        .bank-payment-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .bank-security {
+            margin-top: 20px;
+            font-size: 12px;
+            color: var(--ozon-gray-50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .qr-container {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 16px;
+            margin: 20px 0;
+            width: 250px;
+            height: 250px;
+            margin-left: auto;
+            margin-right: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 15px;
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .qr-code img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .qr-instruction {
+            background: var(--ozon-gray-30);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .qr-instruction ol {
+            margin-left: 20px;
+            color: var(--ozon-gray-50);
+        }
+
+        .qr-instruction li {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .receipt-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: var(--ozon-gray-30);
+            border-radius: 12px;
+            border: 2px dashed var(--glass-border);
+            text-align: center;
+        }
+
+        .receipt-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+            background: var(--ozon-gray-20);
+            border: 2px dashed var(--ozon-blue);
+            border-radius: 12px;
+            color: var(--ozon-blue);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .receipt-upload:hover {
+            background: rgba(0, 91, 255, 0.1);
+        }
+
+        .receipt-upload i {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .receipt-text {
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--ozon-white);
+        }
+
+        .receipt-info {
+            font-size: 12px;
+            color: var(--ozon-gray-50);
+            margin-top: 10px;
+        }
+
+        .order-summary {
+            background: var(--ozon-gray-30);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .order-item.total {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--ozon-gray-40);
+        }
+
+        .order-status {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .status-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 32px;
+        }
+
+        .status-success .status-icon {
+            background: linear-gradient(135deg, var(--success-green), #30D158);
+        }
+
+        .status-pending .status-icon {
+            background: linear-gradient(135deg, var(--warning-yellow), #FF9F0A);
+        }
+
+        .status-error .status-icon {
+            background: linear-gradient(135deg, var(--error-red), #FF6666);
+        }
+
+        .status-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .status-desc {
+            color: var(--ozon-gray-50);
+            margin-bottom: 24px;
+        }
+
+        .order-details {
+            background: var(--ozon-gray-30);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            color: var(--ozon-gray-50);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 15px 20px;
+            max-width: 350px;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-icon {
+            font-size: 20px;
+        }
+
+        .notification.success .notification-icon {
+            color: var(--success-green);
+        }
+
+        .notification.warning .notification-icon {
+            color: var(--warning-yellow);
+        }
+
+        .notification.error .notification-icon {
+            color: var(--error-red);
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 12px 120px;
+            }
+            .cart-item {
+                padding: 12px;
+            }
+            .item-image {
+                width: 70px;
+                height: 70px;
+            }
+            .modal-content {
+                max-height: 85vh;
+            }
+            .phone-code {
+                min-width: 50px;
+                padding: 14px 8px;
+            }
+            .qr-container {
+                width: 220px;
+                height: 220px;
+            }
+            .qr-code {
+                width: 180px;
+                height: 180px;
+            }
+            .recent-item {
+                min-width: 130px;
+            }
+            .recent-item-image {
+                height: 90px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <a class="back-btn" href="javascript:history.back()">
+                    <i class="fas fa-arrow-left"></i> Назад
+                </a>
+            </div>
+            <h1 class="page-title">
+                <i class="fas fa-shopping-bag" style="color: var(--ozon-blue);"></i> Корзина
+            </h1>
+        </div>
+
+        <div id="authBanner" class="auth-banner" style="display: none;">
+            <h3><i class="fas fa-user-circle"></i> Войдите в аккаунт</h3>
+            <p>Для работы с корзиной необходимо войти в аккаунт</p>
+            <button class="auth-btn" onclick="window.location.href='profile.html'">
+                <i class="fas fa-sign-in-alt"></i> Войти в аккаунт
+            </button>
+        </div>
+
+        <div id="cartItems" class="cart-items">
+            <div class="loading" id="loading">
+                <i class="fas fa-spinner"></i>
+                <p>Загрузка корзины...</p>
+            </div>
+        </div>
+
+        <!-- Новая секция: Недавно просмотренные товары -->
+        <div class="recently-viewed-section" id="recentlyViewedSection" style="display: none;">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-clock" style="color: var(--ozon-blue);"></i> Недавно просмотренные
+                </h2>
+                <button class="clear-history-btn" onclick="clearRecentlyViewed()">
+                    <i class="fas fa-trash"></i> Очистить
+                </button>
+            </div>
+            <div id="recentlyViewedItems" class="recently-viewed-items">
+                <!-- Здесь будут отображаться недавно просмотренные товары -->
+            </div>
+        </div>
+    </div>
+
+    <div class="cart-summary" id="cartSummary" style="display: none;">
+        <div class="total-row">
+            <span class="total-label">Итого:</span>
+            <span class="total-amount" id="totalAmount">0 ₽</span>
+        </div>
+        <button class="checkout-btn" id="checkoutBtn" onclick="showCheckoutModal()">
+            Оформить заказ
+        </button>
+    </div>
+
+    <div class="modal-overlay" id="checkoutModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Оформление заказа</h2>
+                <button class="close-modal" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Содержимое будет динамически обновляться -->
+            </div>
+        </div>
+    </div>
+
+    <div class="bank-payment-modal bank-tinkoff" id="tinkoffPaymentModal">
+        <div class="bank-payment-content">
+            <div class="bank-header">
+                <button class="bank-back-btn" onclick="closeBankModal()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 class="bank-title">Оплата через Т-банк</h2>
+            </div>
+            <div class="bank-body">
+                <div class="bank-logo">Т</div>
+                <div class="bank-amount" id="tinkoffAmount">0 ₽</div>
+                <p>Оплатите заказ в один клик через Т-банк</p>
+                <div class="bank-instruction">
+                    <h4>Как оплатить:</h4>
+                    <ol>
+                        <li>Нажмите кнопку "Оплатить в один клик"</li>
+                        <li>Вас перенаправит в приложение Т-банк</li>
+                        <li>Подтвердите платеж Face ID или паролем</li>
+                        <li>Ожидайте подтверждения оплаты</li>
+                    </ol>
+                </div>
+                <button class="bank-payment-btn" onclick="processBankPayment('tinkoff')">
+                    <i class="fas fa-bolt"></i> Оплатить в один клик
+                </button>
+                <div class="bank-security">
+                    <i class="fas fa-lock"></i>
+                    <span>Платеж защищен по стандарту PCI DSS</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bank-payment-modal bank-vtb" id="vtbPaymentModal">
+        <div class="bank-payment-content">
+            <div class="bank-header">
+                <button class="bank-back-btn" onclick="closeBankModal()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 class="bank-title">Оплата через ВТБ-Банк</h2>
+            </div>
+            <div class="bank-body">
+                <div class="bank-logo">ВТБ</div>
+                <div class="bank-amount" id="vtbAmount">0 ₽</div>
+                <p>Быстрая оплата через ВТБ-Банк Онлайн</p>
+                <div class="bank-instruction">
+                    <h4>Как оплатить:</h4>
+                    <ol>
+                        <li>Нажмите кнопку "Оплатить в один клик"</li>
+                        <li>Откроется приложение ВТБ-Банк Онлайн</li>
+                        <li>Подтвердите платеж</li>
+                        <li>Оплата произойдет мгновенно</li>
+                    </ol>
+                </div>
+                <button class="bank-payment-btn" onclick="processBankPayment('vtb')">
+                    <i class="fas fa-bolt"></i> Оплатить в один клик
+                </button>
+                <div class="bank-security">
+                    <i class="fas fa-lock"></i>
+                    <span>Защищено технологией 3D Secure</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bank-payment-modal bank-alpha" id="alphaPaymentModal">
+        <div class="bank-payment-content">
+            <div class="bank-header">
+                <button class="bank-back-btn" onclick="closeBankModal()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 class="bank-title">Оплата через Альфа-Банк</h2>
+            </div>
+            <div class="bank-body">
+                <div class="bank-logo">A</div>
+                <div class="bank-amount" id="alphaAmount">0 ₽</div>
+                <p>Мгновенная оплата через Альфа-Банк</p>
+                <div class="bank-instruction">
+                    <h4>Как оплатить:</h4>
+                    <ol>
+                        <li>Нажмите кнопку "Оплатить в один клик"</li>
+                        <li>Переход в приложение Альфа-Банка</li>
+                        <li>Автоподтверждение по Face ID</li>
+                        <li>Мгновенное списание средств</li>
+                    </ol>
+                </div>
+                <button class="bank-payment-btn" onclick="processBankPayment('alpha')">
+                    <i class="fas fa-bolt"></i> Оплатить в один клик
+                </button>
+                <div class="bank-security">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Платежи защищены Альфа-Банком</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle notification-icon"></i>
+        <span id="notificationText">Уведомление</span>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_XhDZ9rUv7wFlQkHMFwvkA5muZY4T-5I",
+            authDomain: "estels-86a9c.firebaseapp.com",
+            databaseURL: "https://estels-86a9c-default-rtdb.firebaseio.com",
+            projectId: "estels-86a9c",
+            storageBucket: "estels-86a9c.firebasestorage.app",
+            messagingSenderId: "886795277090",
+            appId: "1:886795277090:web:0e7cff9111d69e8b828b7b",
+            measurementId: "G-FCH1Y0WX17"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        let currentUser = null;
+        let cart = [];
+        let recentlyViewed = [];
+        let currentOrder = null;
+        let selectedPaymentMethod = 'cash';
+        let currentTotal = 0;
+        let qrCodeUrl = null;
+        let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Проверяем состояние авторизации
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    currentUser = user;
+                    document.getElementById('authBanner').style.display = 'none';
+                    loadCart();
+                    loadRecentlyViewed();
+                } else {
+                    currentUser = null;
+                    document.getElementById('authBanner').style.display = 'block';
+                    loadCart();
+                    loadRecentlyViewed();
+                }
+            });
+            
+            loadQRCode();
+            loadFavorites();
+        });
+
+        // Загрузка избранных товаров
+        function loadFavorites() {
+            const savedFavorites = localStorage.getItem('favorites');
+            if (savedFavorites) {
+                favorites = JSON.parse(savedFavorites);
+            }
+        }
+
+        // Сохранение избранных товаров
+        function saveFavorites() {
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+        }
+
+        // Проверка, находится ли товар в избранном
+        function isFavorite(itemId) {
+            return favorites.some(fav => fav.id === itemId);
+        }
+
+        // Переключение избранного статуса
+        async function toggleFavorite(item) {
+            if (!item || !item.id) return;
+
+            const index = favorites.findIndex(fav => fav.id === item.id);
+            
+            if (index > -1) {
+                favorites.splice(index, 1);
+            } else {
+                favorites.push({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    image: item.image,
+                    addedAt: Date.now()
+                });
+            }
+
+            saveFavorites();
+            renderCart();
+            renderRecentlyViewed();
+            showNotification(index > -1 ? 'Удалено из избранного' : 'Добавлено в избранное', 'success');
+        }
+
+        // Загрузка истории просмотров
+        async function loadRecentlyViewed() {
+            try {
+                // Загружаем из локального хранилища
+                const savedRecentlyViewed = localStorage.getItem('recentlyViewed');
+                if (savedRecentlyViewed) {
+                    recentlyViewed = JSON.parse(savedRecentlyViewed);
+                }
+
+                // Загружаем из Firebase для авторизованных пользователей
+                if (currentUser) {
+                    const snapshot = await database.ref(`recentlyViewed/${currentUser.uid}`).once('value');
+                    if (snapshot.exists()) {
+                        const firebaseData = snapshot.val();
+                        if (firebaseData && typeof firebaseData === 'object') {
+                            // Объединяем данные из Firebase с локальными
+                            const firebaseArray = Object.values(firebaseData)
+                                .filter(item => item && item.id)
+                                .sort((a, b) => (b.viewedAt || 0) - (a.viewedAt || 0));
+                            
+                            // Объединяем, избегая дубликатов
+                            firebaseArray.forEach(firebaseItem => {
+                                if (!recentlyViewed.some(item => item.id === firebaseItem.id)) {
+                                    recentlyViewed.push(firebaseItem);
+                                }
+                            });
+                            
+                            // Сортируем по времени просмотра
+                            recentlyViewed.sort((a, b) => (b.viewedAt || 0) - (a.viewedAt || 0));
+                            
+                            // Ограничиваем количество
+                            if (recentlyViewed.length > 20) {
+                                recentlyViewed = recentlyViewed.slice(0, 20);
+                            }
+                        }
+                    }
+                }
+
+                renderRecentlyViewed();
+            } catch (error) {
+                console.error('Ошибка загрузки истории просмотров:', error);
+                renderRecentlyViewed();
+            }
+        }
+
+        // Сохранение истории просмотров
+        async function saveRecentlyViewed() {
+            try {
+                // Сохраняем в локальное хранилище
+                localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
+
+                // Сохраняем в Firebase для авторизованных пользователей
+                if (currentUser) {
+                    const recentlyViewedRef = database.ref(`recentlyViewed/${currentUser.uid}`);
+                    
+                    // Преобразуем массив в объект для Firebase
+                    const recentlyViewedObject = {};
+                    recentlyViewed.forEach((item, index) => {
+                        if (item && item.id) {
+                            recentlyViewedObject[index] = {
+                                ...item,
+                                savedAt: Date.now()
+                            };
+                        }
+                    });
+
+                    await recentlyViewedRef.set(recentlyViewedObject);
+                }
+            } catch (error) {
+                console.error('Ошибка сохранения истории просмотров:', error);
+            }
+        }
+
+        // Добавление товара в историю просмотров
+        function addToRecentlyViewed(item) {
+            if (!item || !item.id) return;
+
+            // Удаляем существующий товар с таким же ID
+            const existingIndex = recentlyViewed.findIndex(recent => recent.id === item.id);
+            if (existingIndex > -1) {
+                recentlyViewed.splice(existingIndex, 1);
+            }
+
+            // Добавляем новый товар в начало
+            recentlyViewed.unshift({
+                ...item,
+                viewedAt: Date.now()
+            });
+
+            // Ограничиваем количество записей
+            if (recentlyViewed.length > 20) {
+                recentlyViewed = recentlyViewed.slice(0, 20);
+            }
+
+            saveRecentlyViewed();
+            renderRecentlyViewed();
+        }
+
+        // Очистка истории просмотров
+        async function clearRecentlyViewed() {
+            if (recentlyViewed.length === 0) {
+                showNotification('История просмотров уже пуста', 'info');
+                return;
+            }
+
+            if (confirm('Вы уверены, что хотите очистить историю просмотров?')) {
+                recentlyViewed = [];
+                
+                try {
+                    localStorage.removeItem('recentlyViewed');
+                    
+                    if (currentUser) {
+                        await database.ref(`recentlyViewed/${currentUser.uid}`).remove();
+                    }
+                    
+                    renderRecentlyViewed();
+                    showNotification('История просмотров очищена', 'success');
+                } catch (error) {
+                    console.error('Ошибка очистки истории просмотров:', error);
+                    showNotification('Ошибка при очистке истории', 'error');
+                }
+            }
+        }
+
+        // Отображение истории просмотров
+        function renderRecentlyViewed() {
+            const section = document.getElementById('recentlyViewedSection');
+            const container = document.getElementById('recentlyViewedItems');
+
+            if (!section || !container) return;
+
+            if (recentlyViewed.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'block';
+            
+            let itemsHtml = '';
+            
+            recentlyViewed.slice(0, 10).forEach(item => {
+                if (!item || !item.id) return;
+
+                const itemImage = item.image || 'https://dummyimage.com/120x120/3c3c3e/ffffff&text=Товар';
+                const isFav = isFavorite(item.id);
+                const price = Number(item.price) || 0;
+                
+                itemsHtml += `
+                    <div class="recent-item" data-id="${item.id}">
+                        <div class="recent-item-image">
+                            <img src="${itemImage}" 
+                                 alt="${item.name || 'Товар'}"
+                                 onerror="this.src='https://dummyimage.com/120x120/3c3c3e/ffffff&text=Товар'">
+                        </div>
+                        <h3 class="recent-item-title" title="${escapeHtml(item.name || 'Без названия')}">
+                            ${escapeHtml(item.name || 'Без названия')}
+                        </h3>
+                        <div class="recent-item-price">${formatPrice(price)} ₽</div>
+                        <div class="recent-item-actions">
+                            <button class="add-to-cart-btn" onclick="addToCartFromRecentlyViewed(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                                <i class="fas fa-cart-plus"></i>
+                            </button>
+                            <button class="recent-favorite-btn ${isFav ? 'active' : ''}" 
+                                    onclick="toggleFavorite(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = itemsHtml;
+        }
+
+        // Добавление товара в корзину из истории просмотров
+        async function addToCartFromRecentlyViewed(item) {
+            // Проверяем, авторизован ли пользователь
+            if (!currentUser) {
+                showNotification('Для добавления товаров в корзину необходимо войти в аккаунт', 'error');
+                window.location.href = 'profile.html'; // Перенаправляем на страницу профиля
+                return;
+            }
+            
+            if (!item || !item.id) return;
+
+            // Проверяем, есть ли уже такой товар в корзине
+            const existingIndex = cart.findIndex(cartItem => cartItem.id === item.id);
+            
+            if (existingIndex > -1) {
+                // Увеличиваем количество
+                cart[existingIndex].quantity = (cart[existingIndex].quantity || 1) + 1;
+            } else {
+                // Добавляем новый товар
+                cart.push({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    image: item.image,
+                    quantity: 1
+                });
+            }
+
+            // Обновляем отображение корзины
+            renderCart();
+            updateTotalAmount();
+
+            // Сохраняем изменения
+            try {
+                if (currentUser) {
+                    await updateCartInFirebase();
+                    showNotification('Товар добавлен в корзину', 'success');
+                }
+            } catch (error) {
+                console.error('Ошибка добавления в корзину:', error);
+                showNotification('Ошибка при добавлении в корзину', 'error');
+            }
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const icon = notification.querySelector('.notification-icon');
+            const text = document.getElementById('notificationText');
+            
+            text.textContent = message;
+            notification.className = 'notification';
+            notification.classList.add(type);
+            
+            if (type === 'success') {
+                icon.className = 'fas fa-check-circle notification-icon';
+            } else if (type === 'warning') {
+                icon.className = 'fas fa-exclamation-triangle notification-icon';
+            } else if (type === 'info') {
+                icon.className = 'fas fa-info-circle notification-icon';
+            } else {
+                icon.className = 'fas fa-times-circle notification-icon';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        async function loadCart() {
+            const loading = document.getElementById('loading');
+            const authBanner = document.getElementById('authBanner');
+            
+            try {
+                // Пытаемся загрузить корзину только для авторизованных пользователей
+                if (currentUser) {
+                    // Загружаем корзину из Firebase
+                    await loadCartFromFirebase();
+                    authBanner.style.display = 'none';
+                } else {
+                    // Если пользователь не авторизован, показываем пустую корзину
+                    cart = [];
+                    renderCart();
+                    authBanner.style.display = 'block';
+                }
+                loading.style.display = 'none';
+            } catch (error) {
+                console.error('Ошибка загрузки корзины:', error);
+                cart = [];
+                renderCart();
+                loading.style.display = 'none';
+            }
+        }
+
+        async function loadCartFromFirebase() {
+            if (!currentUser) {
+                cart = [];
+                renderCart();
+                return;
+            }
+
+            try {
+                const snapshot = await database.ref(`carts/${currentUser.uid}`).once('value');
+                if (snapshot.exists()) {
+                    try {
+                        const firebaseCart = snapshot.val();
+                        if (typeof firebaseCart === 'object' && firebaseCart !== null) {
+                            const firebaseCartArray = [];
+                            Object.keys(firebaseCart).forEach(key => {
+                                if (firebaseCart[key]) {
+                                    firebaseCartArray.push(firebaseCart[key]);
+                                }
+                            });
+
+                            cart = firebaseCartArray;
+                            renderCart();
+                        }
+                    } catch (error) {
+                        console.error('Ошибка обработки данных:', error);
+                        cart = [];
+                        renderCart();
+                    }
+                } else {
+                    cart = [];
+                    renderCart();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки корзины из Firebase:', error);
+                cart = [];
+                renderCart();
+            }
+        }
+
+        async function updateCartInFirebase() {
+            if (!currentUser) return;
+
+            try {
+                const userCartRef = database.ref(`carts/${currentUser.uid}`);
+                const cartObject = {};
+                cart.forEach((item, index) => {
+                    if (item && item.id) {
+                        cartObject[index] = item;
+                    }
+                });
+
+                await userCartRef.set(cartObject);
+            } catch (error) {
+                console.error('Ошибка сохранения:', error);
+            }
+        }
+
+        function renderCart() {
+            const cartItems = document.getElementById('cartItems');
+            const authBanner = document.getElementById('authBanner');
+            const cartSummary = document.getElementById('cartSummary');
+            
+            // Если пользователь не авторизован
+            if (!currentUser) {
+                cartSummary.style.display = 'none';
+                return;
+            }
+
+            const emptyCartHtml = `
+                <div class="empty-cart" id="emptyCart">
+                    <i class="fas fa-shopping-bag"></i>
+                    <h3>Корзина пуста</h3>
+                    <p>Добавьте товары из магазина</p>
+                    <button class="checkout-btn" onclick="window.location.href='index.html'">
+                        Перейти в магазин
+                    </button>
+                </div>
+            `;
+
+            if (!cart || cart.length === 0) {
+                cartItems.innerHTML = emptyCartHtml;
+                cartSummary.style.display = 'none';
+                return;
+            }
+
+            let total = 0;
+            let itemsHtml = '';
+
+            cart.forEach((item, index) => {
+                if (!item || !item.id) return;
+
+                const price = Number(item.price) || 0;
+                const quantity = Number(item.quantity) || 1;
+                const itemTotal = price * quantity;
+                total += itemTotal;
+
+                const itemImage = item.image || 'https://dummyimage.com/80x80/3c3c3e/ffffff&text=Товар';
+                const isFav = isFavorite(item.id);
+
+                itemsHtml += `
+                    <div class="cart-item" data-index="${index}">
+                        <button class="favorite-btn ${isFav ? 'active' : ''}" 
+                                onclick="toggleFavorite(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <div class="item-image">
+                            <img src="${itemImage}" 
+                                 alt="${item.name || 'Товар'}"
+                                 onerror="this.src='https://dummyimage.com/80x80/3c3c3e/ffffff&text=Товар'">
+                        </div>
+                        <div class="item-info">
+                            <h3 class="item-title">${escapeHtml(item.name || 'Без названия')}</h3>
+                            <div class="item-price">${formatPrice(price)} ₽</div>
+                            <div class="item-controls">
+                                <button class="quantity-btn" onclick="changeQuantity(${index}, -1)">-</button>
+                                <span class="quantity" id="quantity-${index}">${quantity}</span>
+                                <button class="quantity-btn" onclick="changeQuantity(${index}, 1)">+</button>
+                                <button class="remove-btn" onclick="removeItem(${index})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            cartItems.innerHTML = itemsHtml;
+            document.getElementById('totalAmount').textContent = formatPrice(total) + ' ₽';
+            cartSummary.style.display = 'block';
+            document.getElementById('checkoutBtn').disabled = false;
+        }
+
+        async function loadQRCode() {
+            try {
+                const snapshot = await database.ref('payment/qr_code').once('value');
+                if (snapshot.exists()) {
+                    const qrData = snapshot.val();
+                    if (qrData && qrData.data) {
+                        try {
+                            qrCodeUrl = atob(qrData.data);
+                        } catch (e) {
+                            console.error('Ошибка декодирования QR-кода:', e);
+                            qrCodeUrl = null;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки QR  кода:', error);
+                qrCodeUrl = null;
+            }
+        }
+
+        function showCheckoutModal() {
+            if (cart.length === 0) return;
+
+            const modal = document.getElementById('checkoutModal');
+            const modalBody = document.getElementById('modalBody');
+
+            currentTotal = calculateTotal();
+
+            modalBody.innerHTML = `
+                <div class="order-summary">
+                    <div class="section-title">
+                        <i class="fas fa-receipt"></i> Состав заказа
+                    </div>
+                    ${cart.map(item => `
+                        <div class="order-item">
+                            <span>${escapeHtml(item.name || 'Товар')} × ${item.quantity || 1}</span>
+                            <span>${formatPrice((item.price || 0) * (item.quantity || 1))} ₽</span>
+                        </div>
+                    `).join('')}
+                    <div class="order-item total">
+                        <span>Итого</span>
+                        <span>${formatPrice(currentTotal)} ₽</span>
+                    </div>
+                </div>
+
+                <div class="section-title">
+                    <i class="fas fa-user"></i> Контактные данные
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Имя</label>
+                    <input type="text" class="form-input" id="customerName" 
+                           placeholder="Введите ваше имя" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Телефон</label>
+                    <div class="phone-input-group">
+                        <div class="phone-code">+7</div>
+                        <div class="phone-number">
+                            <input type="tel" class="form-input" id="customerPhone" 
+                                   placeholder="900 123-45-67" 
+                                   pattern="[0-9]{10}"
+                                   maxlength="15"
+                                   required
+                                   style="width: 100%;">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Адрес доставки</label>
+                    <input type="text" class="form-input" id="customerAddress" 
+                           placeholder="Город, улица, дом, квартира" required>
+                    <div class="address-note">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Вводите данные корректно для успешного оформления заказа
+                    </div>
+                </div>
+
+                <div class="section-title">
+                    <i class="fas fa-credit-card"></i> Способ оплаты
+                </div>
+                <div class="payment-methods">
+                    <div class="payment-method payment-cash ${selectedPaymentMethod === 'cash' ? 'selected' : ''}" 
+                         onclick="selectPaymentMethod('cash')">
+                        <div class="payment-icon">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                        <div class="payment-info">
+                            <div class="payment-title">Оплата QR-Кодом</div>
+                            <div class="payment-desc">Отсканируйте QR-код</div>
+                        </div>
+                        <div class="payment-radio"></div>
+                    </div>
+                    
+                    <div class="payment-method payment-tinkoff ${selectedPaymentMethod === 'tinkoff' ? 'selected' : ''}" 
+                         onclick="selectPaymentMethod('tinkoff')">
+                        <div class="payment-icon" style="background: linear-gradient(135deg, var(--tinkoff-yellow), #FFD600); color: #000;">
+                            <span style="font-weight: bold;">Т</span>
+                        </div>
+                        <div class="payment-info">
+                            <div class="payment-title">Т-банк</div>
+                            <div class="payment-desc">Оплата в один клик</div>
+                        </div>
+                        <div class="payment-radio"></div>
+                    </div>
+                    
+                    <div class="payment-method payment-vtb ${selectedPaymentMethod === 'vtb' ? 'selected' : ''}" 
+                         onclick="selectPaymentMethod('vtb')">
+                        <div class="payment-icon">
+                            <span style="color: white; font-weight: bold;">ВТБ</span>
+                        </div>
+                        <div class="payment-info">
+                            <div class="payment-title">ВТБ-Банк</div>
+                            <div class="payment-desc">Быстрая оплата онлайн</div>
+                        </div>
+                        <div class="payment-radio"></div>
+                    </div>
+                    
+                    <div class="payment-method payment-alpha ${selectedPaymentMethod === 'alpha' ? 'selected' : ''}" 
+                         onclick="selectPaymentMethod('alpha')">
+                        <div class="payment-icon">
+                            <span style="color: white; font-weight: bold;">A</span>
+                        </div>
+                        <div class="payment-info">
+                            <div class="payment-title">Альфа-Банк</div>
+                            <div class="payment-desc">Мгновенная оплата</div>
+                        </div>
+                        <div class="payment-radio"></div>
+                    </div>
+                </div>
+
+                <button class="checkout-btn" onclick="validateAndProceed()" style="margin-top: 20px;">
+                    Продолжить
+                </button>
+            `;
+
+            modal.style.display = 'flex';
+
+            const phoneInput = document.getElementById('customerPhone');
+            phoneInput.addEventListener('input', function (e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 10) value = value.substring(0, 10);
+
+                if (value.length > 0) {
+                    let formatted = value;
+                    if (value.length > 0) {
+                        formatted = value.substring(0, 3);
+                        if (value.length > 3) {
+                            formatted += ' ' + value.substring(3, 6);
+                        }
+                        if (value.length > 6) {
+                            formatted += '-' + value.substring(6, 8);
+                        }
+                        if (value.length > 8) {
+                            formatted += '-' + value.substring(8, 10);
+                        }
+                    }
+                    e.target.value = formatted;
+                } else {
+                    e.target.value = '';
+                }
+            });
+        }
+
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+
+            document.querySelectorAll('.payment-method').forEach(el => {
+                el.classList.remove('selected');
+            });
+
+            const selectedEl = document.querySelector(`.payment-${method}`);
+            if (selectedEl) {
+                selectedEl.classList.add('selected');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('checkoutModal').style.display = 'none';
+        }
+
+        function closeBankModal() {
+            document.querySelectorAll('.bank-payment-modal').forEach(modal => {
+                modal.style.display = 'none';
+            });
+        }
+
+        function calculateTotal() {
+            return cart.reduce((sum, item) => {
+                const price = Number(item.price) || 0;
+                const quantity = Number(item.quantity) || 1;
+                return sum + (price * quantity);
+            }, 0);
+        }
+
+        function validateAndProceed() {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.replace(/\D/g, '');
+            const address = document.getElementById('customerAddress').value.trim();
+
+            if (!name || !phone || !address) {
+                showNotification('Пожалуйста, заполните все обязательные поля', 'error');
+                return;
+            }
+
+            if (phone.length !== 10) {
+                showNotification('Введите корректный номер телефона (10 цифр)', 'error');
+                return;
+            }
+
+            const customerData = {
+                name: name,
+                phone: '+7' + phone,
+                address: address
+            };
+
+            if (selectedPaymentMethod === 'cash') {
+                showQRPayment(customerData);
+            } else if (['tinkoff', 'vtb', 'alpha'].includes(selectedPaymentMethod)) {
+                showBankPayment(selectedPaymentMethod, customerData);
+            }
+        }
+
+        function showQRPayment(customerData) {
+            closeModal();
+
+            const modal = document.getElementById('checkoutModal');
+            modal.style.display = 'flex';
+
+            if (!qrCodeUrl) {
+                document.getElementById('modalBody').innerHTML = `
+                    <div class="order-status status-pending">
+                        <div class="status-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h2 class="status-title">QR-код не загружен</h2>
+                        <p class="status-desc">Администратор еще не загрузил QR-код для оплаты</p>
+                        
+                        <button class="checkout-btn" onclick="showCheckoutModal()" style="margin-top: 20px;">
+                            Вернуться к выбору оплаты
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById('modalBody').innerHTML = `
+                <div class="order-status">
+                    <div class="status-icon" style="background: linear-gradient(135deg, var(--ozon-blue), var(--ozon-blue-dark));">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                    <h2 class="status-title">Оплата QR-Кодом</h2>
+                    <p class="status-desc">Отсканируйте QR-код для оплаты</p>
+                    
+                    <div class="qr-container">
+                        <div class="qr-code">
+                            <img src="${qrCodeUrl}" alt="QR Code">
+                        </div>
+                        <p>Сумма к оплате: <strong>${formatPrice(currentTotal)} ₽</strong></p>
+                    </div>
+                    
+                    <div class="qr-instruction">
+                        <h4>Как оплатить:</h4>
+                        <ol>
+                            <li>Откройте приложение вашего банка</li>
+                            <li>Нажмите "Оплатить по QR-коду"</li>
+                            <li>Наведите камеру на QR-код</li>
+                            <li>Подтвердите оплату</li>
+                        </ol>
+                    </div>
+                    
+                    <button class="checkout-btn" onclick="showReceiptSection()" style="margin-top: 20px;">
+                        <i class="fas fa-check"></i> Я оплатил(а)
+                    </button>
+                    
+                    <p style="color: var(--ozon-gray-50); font-size: 12px; margin-top: 20px;">
+                        <i class="fas fa-info-circle"></i>
+                        После оплаты нажмите "Я оплатил(а)" для подтверждения
+                    </p>
+                </div>
+            `;
+
+            window.bankCustomerData = customerData;
+        }
+
+        function showReceiptSection() {
+            const modal = document.getElementById('checkoutModal');
+            const modalBody = document.getElementById('modalBody');
+
+            modalBody.innerHTML = `
+                <div class="order-status">
+                    <div class="status-icon" style="background: linear-gradient(135deg, var(--ozon-blue), var(--ozon-blue-dark));">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <h2 class="status-title">Подтверждение оплаты</h2>
+                    <p class="status-desc">Загрузите чек об оплате в формате PDF</p>
+                    
+                    <div class="receipt-section">
+                        <label for="receiptUpload" class="receipt-upload">
+                            <i class="fas fa-file-pdf"></i>
+                            <div class="receipt-text">Загрузить чек PDF</div>
+                            <div class="receipt-info">Нажмите для выбора файла</div>
+                        </label>
+                        <input type="file" id="receiptUpload" accept=".pdf" style="display: none;" onchange="handleReceiptUpload(event)">
+                        
+                        <div class="receipt-info">
+                            <p><i class="fas fa-info-circle"></i> Информация:</p>
+                            <p>• Загрузите PDF-файл чека из банковского приложения</p>
+                            <p>• Файл должен быть в формате PDF</p>
+                            <p>• Максимальный размер файла: 10MB</p>
+                        </div>
+                        
+                        <div id="receiptPreview" style="display: none; margin-top: 20px;">
+                            <p style="color: var(--success-green);">
+                                <i class="fas fa-check-circle"></i> Файл загружен
+                            </p>
+                            <p id="fileName" style="font-size: 12px; color: var(--ozon-gray-50);"></p>
+                        </div>
+                    </div>
+                    
+                    <button class="checkout-btn" onclick="submitReceiptInfo()" id="submitReceiptBtn" style="margin-top: 20px;" disabled>
+                        <i class="fas fa-paper-plane"></i> Отправить данные
+                    </button>
+                    
+                    <button class="checkout-btn" onclick="showQRPayment(window.bankCustomerData)" style="margin-top: 10px; background: var(--ozon-gray-30);">
+                        <i class="fas fa-arrow-left"></i> Назад
+                    </button>
+                </div>
+            `;
+        }
+
+        let receiptFile = null;
+
+        function handleReceiptUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.type !== 'application/pdf') {
+                showNotification('Пожалуйста, выберите PDF файл', 'error');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                showNotification('Файл слишком большой. Максимальный размер: 10MB', 'error');
+                return;
+            }
+
+            receiptFile = file;
+            document.getElementById('receiptPreview').style.display = 'block';
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('submitReceiptBtn').disabled = false;
+            showNotification('Файл успешно загружен', 'success');
+        }
+
+        async function submitReceiptInfo() {
+            if (!receiptFile) {
+                showNotification('Пожалуйста, загрузите чек', 'error');
+                return;
+            }
+            
+            const customerData = window.bankCustomerData;
+            if (!customerData) {
+                showNotification('Ошибка: данные клиента не найдены', 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitReceiptBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+            submitBtn.disabled = true;
+
+            try {
+                const orderNumber = 'QR-' + Date.now().toString().slice(-8) + Math.floor(Math.random() * 1000);
+
+                currentOrder = {
+                    id: orderNumber,
+                    items: cart.map(item => ({
+                        ...item,
+                        price: Number(item.price) || 0,
+                        quantity: Number(item.quantity) || 1
+                    })),
+                    total: currentTotal,
+                    customer: customerData,
+                    paymentMethod: 'qr',
+                    status: 'pending_verification',
+                    receiptInfo: {
+                        fileName: receiptFile.name,
+                        fileSize: receiptFile.size,
+                        uploadTime: Date.now()
+                    },
+                    createdAt: Date.now(),
+                    updatedAt: Date.now()
+                };
+
+                if (currentUser) {
+                    await database.ref(`orders/${currentUser.uid}/${orderNumber}`).set(currentOrder);
+                }
+
+                const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                orders.push(currentOrder);
+                localStorage.setItem('orders', JSON.stringify(orders));
+
+                document.getElementById('modalBody').innerHTML = `
+                    <div class="order-status status-pending">
+                        <div class="status-icon" style="animation: pulse 1s infinite;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                        <h2 class="status-title">Данные отправлены!</h2>
+                        <p class="status-desc">Номер вашего заказа: ${orderNumber}</p>
+                        
+                        <div style="text-align: center; margin-top: 30px;">
+                            <p>Информация о платеже отправлена на проверку администратору.</p>
+                            <p style="color: var(--ozon-gray-50); font-size: 14px; margin-top: 10px;">
+                                Вы получите уведомление о результате проверки.
+                            </p>
+                            
+                            <button class="checkout-btn" onclick="closeModalAndRedirect()" style="margin-top: 20px;">
+                                <i class="fas fa-check"></i> Понятно
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Ошибка создания заказа:', error);
+                showNotification('Произошла ошибка при создании заказа', 'error');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        function closeModalAndRedirect() {
+            closeModal();
+            loadCart();
+            showNotification('Данные о платеже отправлены на проверку', 'success');
+        }
+
+        function showBankPayment(bank, customerData) {
+            closeModal();
+
+            const modal = document.getElementById(`${bank}PaymentModal`);
+            const amountElement = document.getElementById(`${bank}Amount`);
+
+            amountElement.textContent = formatPrice(currentTotal) + ' ₽';
+            modal.style.display = 'flex';
+
+            window.bankCustomerData = customerData;
+        }
+
+        async function processBankPayment(bank) {
+            const customerData = window.bankCustomerData;
+
+            if (!customerData) {
+                alert('Ошибка: данные клиента не найдены');
+                return;
+            }
+
+            const orderNumber = 'ORD-' + Date.now().toString().slice(-8) + Math.floor(Math.random() * 1000);
+
+            currentOrder = {
+                id: orderNumber,
+                items: cart.map(item => ({
+                    ...item,
+                    price: Number(item.price) || 0,
+                    quantity: Number(item.quantity) || 1
+                })),
+                total: currentTotal,
+                customer: customerData,
+                paymentMethod: bank,
+                status: 'pending_payment',
+                bank: bank,
+                createdAt: Date.now(),
+                updatedAt: Date.now()
+            };
+
+            try {
+                if (currentUser) {
+                    await database.ref(`orders/${currentUser.uid}/${orderNumber}`).set(currentOrder);
+                }
+
+                const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                orders.push(currentOrder);
+                localStorage.setItem('orders', JSON.stringify(orders));
+
+                closeBankModal();
+                simulateBankPayment(bank, orderNumber);
+
+            } catch (error) {
+                console.error('Ошибка создания заказа:', error);
+                alert('Произошла ошибка при создании заказа');
+            }
+        }
+
+        function simulateBankPayment(bank, orderNumber) {
+            const modal = document.getElementById('checkoutModal');
+            modal.style.display = 'flex';
+
+            document.getElementById('modalBody').innerHTML = `
+                <div class="order-status status-pending">
+                    <div class="status-icon" style="animation: pulse 1s infinite; background: ${getBankColor(bank)};">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <h2 class="status-title">Оплата через ${getBankName(bank)}</h2>
+                    <p class="status-desc">Перенаправляем в банковское приложение...</p>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <p>Вы будете перенаправлены в приложение ${getBankName(bank)} для оплаты</p>
+                        <div class="bank-instruction" style="margin: 20px 0;">
+                            <h4>Что произойдет:</h4>
+                            <ol>
+                                <li>Откроется приложение ${getBankName(bank)}</li>
+                                <li>Автоматически подставится сумма ${formatPrice(currentTotal)} ₽</li>
+                                <li>Подтвердите платеж Face ID или паролем</li>
+                                <li>Вернетесь в это окно для завершения</li>
+                            </ol>
+                        </div>
+                        
+                        <button class="checkout-btn" onclick="completeBankPayment('${bank}', '${orderNumber}')" 
+                                style="background: ${getBankColor(bank)}; margin-top: 20px;">
+                            <i class="fas fa-external-link-alt"></i> Перейти к оплате
+                        </button>
+                        
+                        <p style="color: var(--ozon-gray-50); font-size: 12px; margin-top: 20px;">
+                            <i class="fas fa-info-circle"></i>
+                            Это демо-режим. В реальном приложении здесь будет ссылка на оплату
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function completeBankPayment(bank, orderNumber) {
+            currentOrder.status = 'paid';
+            currentOrder.paymentConfirmedAt = Date.now();
+            currentOrder.updatedAt = Date.now();
+
+            await saveOrderUpdate();
+
+            if (currentOrder.status === 'paid') {
+                cart = [];
+                if (currentUser) {
+                    await updateCartInFirebase();
+                }
+            }
+
+            showOrderSuccess(currentOrder);
+        }
+
+        async function saveOrderUpdate() {
+            try {
+                if (currentUser && currentOrder) {
+                    await database.ref(`orders/${currentUser.uid}/${currentOrder.id}`).set(currentOrder);
+                }
+
+                const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                const index = orders.findIndex(o => o.id === currentOrder.id);
+                if (index !== -1) {
+                    orders[index] = currentOrder;
+                    localStorage.setItem('orders', JSON.stringify(orders));
+                }
+            } catch (error) {
+                console.error('Ошибка обновления заказа:', error);
+            }
+        }
+
+        function showOrderSuccess(order) {
+            document.getElementById('cartSummary').style.display = 'none';
+            document.getElementById('cartItems').innerHTML = `
+                <div class="empty-cart" id="emptyCart">
+                    <i class="fas fa-check-circle" style="color: var(--success-green);"></i>
+                    <h3>Заказ оформлен!</h3>
+                    <p>Номер вашего заказа: ${order.id}</p>
+                    <p style="color: var(--ozon-gray-50); font-size: 14px; margin: 10px 0;">
+                        ${getBankName(order.bank) ? `Оплата через ${getBankName(order.bank)}` : 'Оплата QR-кодом'}
+                    </p>
+                    <button class="checkout-btn" onclick="window.location.href='index.html'">
+                        Вернуться в магазин
+                    </button>
+                </div>
+            `;
+            closeModal();
+        }
+
+        function getBankName(bank) {
+            switch (bank) {
+                case 'tinkoff': return 'Т-банк';
+                case 'vtb': return 'ВТБ-Банк';
+                case 'alpha': return 'Альфа-Банк';
+                default: return null;
+            }
+        }
+
+        function getBankColor(bank) {
+            switch (bank) {
+                case 'tinkoff': return 'var(--tinkoff-yellow)';
+                case 'vtb': return 'var(--vtb-blue)';
+                case 'alpha': return 'var(--alpha-green)';
+                default: return 'var(--ozon-blue)';
+            }
+        }
+
+        async function changeQuantity(index, change) {
+            // Проверяем авторизацию
+            if (!currentUser) {
+                showNotification('Для работы с корзиной необходимо войти в аккаунт', 'error');
+                window.location.href = 'profile.html'; // Перенаправляем на страницу профиля
+                return;
+            }
+            
+            if (!cart[index]) return;
+
+            const currentQuantity = Number(cart[index].quantity) || 1;
+            const newQuantity = currentQuantity + change;
+
+            if (newQuantity < 1) {
+                await removeItem(index);
+            } else {
+                cart[index].quantity = newQuantity;
+
+                const quantityElement = document.getElementById(`quantity-${index}`);
+                if (quantityElement) {
+                    quantityElement.textContent = newQuantity;
+                }
+
+                updateTotalAmount();
+
+                if (currentUser) {
+                    await updateCartInFirebase();
+                }
+            }
+        }
+
+        async function removeItem(index) {
+            // Проверяем авторизацию
+            if (!currentUser) {
+                showNotification('Для работы с корзиной необходимо войти в аккаунт', 'error');
+                window.location.href = 'profile.html'; // Перенаправляем на страницу профиля
+                return;
+            }
+            
+            if (!cart[index]) return;
+
+            const itemElement = document.querySelector(`.cart-item[data-index="${index}"]`);
+            if (itemElement) {
+                itemElement.style.opacity = '0.5';
+                itemElement.style.transform = 'scale(0.95)';
+                itemElement.style.transition = 'all 0.3s ease';
+
+                setTimeout(() => {
+                    if (itemElement.parentNode) {
+                        itemElement.parentNode.removeChild(itemElement);
+                    }
+                }, 300);
+            }
+
+            cart.splice(index, 1);
+            updateTotalAmount();
+
+            try {
+                if (currentUser) {
+                    await updateCartInFirebase();
+                }
+            } catch (error) {
+                console.error('Ошибка удаления:', error);
+                showNotification('Ошибка при удалении товара', 'error');
+            }
+
+            if (cart.length === 0) {
+                document.getElementById('cartSummary').style.display = 'none';
+                document.getElementById('cartItems').innerHTML = `
+                    <div class="empty-cart" id="emptyCart">
+                        <i class="fas fa-shopping-bag"></i>
+                        <h3>Корзина пуста</h3>
+                        <p>Добавьте товары из магазина</p>
+                        <button class="checkout-btn" onclick="window.location.href='main.html'">
+                            Перейти в магазин
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function updateTotalAmount() {
+            const total = cart.reduce((sum, item) => {
+                const price = Number(item.price) || 0;
+                const quantity = Number(item.quantity) || 1;
+                return sum + (price * quantity);
+            }, 0);
+
+            document.getElementById('totalAmount').textContent = formatPrice(total) + ' ₽';
+        }
+
+        // Глобальная функция для добавления товара в корзину (для других страниц)
+        window.addToCart = async function(item) {
+            // Проверяем, авторизован ли пользователь
+            if (!currentUser) {
+                showNotification('Для добавления товаров в корзину необходимо войти в аккаунт', 'error');
+                window.location.href = 'profile.html'; // Перенаправляем на страницу профиля
+                return false;
+            }
+            
+            if (!item || !item.id) return false;
+
+            // Проверяем, есть ли уже такой товар в корзине
+            const existingIndex = cart.findIndex(cartItem => cartItem.id === item.id);
+            
+            if (existingIndex > -1) {
+                // Увеличиваем количество
+                cart[existingIndex].quantity = (cart[existingIndex].quantity || 1) + 1;
+            } else {
+                // Добавляем новый товар
+                cart.push({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    image: item.image,
+                    quantity: 1
+                });
+            }
+
+            // Сохраняем изменения
+            try {
+                if (currentUser) {
+                    await updateCartInFirebase();
+                    showNotification('Товар добавлен в корзину', 'success');
+                    return true;
+                }
+            } catch (error) {
+                console.error('Ошибка добавления в корзину:', error);
+                showNotification('Ошибка при добавлении в корзину', 'error');
+                return false;
+            }
+            
+            return false;
+        };
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatPrice(price) {
+            if (price === undefined || price === null || isNaN(price)) {
+                return '0';
+            }
+            const numPrice = Number(price);
+            if (isNaN(numPrice)) return '0';
+            return numPrice.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        }
+
+        window.addEventListener('click', function (event) {
+            const modal = document.getElementById('checkoutModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+
+            const bankModals = document.querySelectorAll('.bank-payment-modal');
+            bankModals.forEach(bankModal => {
+                if (event.target === bankModal) {
+                    closeBankModal();
+                }
+            });
+        });
+
+        // Экспортируем функцию для использования на других страницах
+        window.addToRecentlyViewed = addToRecentlyViewed;
+        window.renderRecentlyViewed = renderRecentlyViewed;
+    </script>
+</body>
+</html>

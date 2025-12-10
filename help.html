@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Basement | Помощь и поддержка</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --ozon-blue: #005BFF;
+            --ozon-blue-dark: #004ECC;
+            --ozon-green: #00B894;
+            --ozon-gray-10: #1A1A1A;
+            --ozon-gray-20: #2C2C2E;
+            --ozon-gray-30: #3C3C3E;
+            --ozon-gray-40: #48484A;
+            --ozon-gray-50: #8E8E93;
+            --ozon-white: #FFFFFF;
+            --glass-bg: rgba(44, 44, 46, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
+            color: var(--ozon-white);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 91, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 153, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 0 16px 40px;
+        }
+
+        .header {
+            padding: 20px 0 16px;
+            margin-bottom: 4px;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            color: var(--ozon-white);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 12px 16px;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            margin-bottom: 16px;
+            width: fit-content;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .back-btn:hover {
+            background: rgba(44, 44, 46, 0.9);
+            border-color: var(--ozon-blue);
+            transform: translateY(-2px);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideUp 0.6s ease-out 0.1s both;
+        }
+
+        .help-section {
+            margin-bottom: 32px;
+            animation: slideUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .help-section:nth-child(2) { animation-delay: 0.2s; }
+        .help-section:nth-child(3) { animation-delay: 0.3s; }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-left: 8px;
+        }
+
+        .glass-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--ozon-gray-50);
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(60, 60, 62, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--ozon-white);
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+            resize: vertical;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            border-color: var(--ozon-blue);
+            box-shadow: 0 0 0 2px rgba(0, 91, 255, 0.2);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--ozon-blue);
+            border: none;
+            border-radius: 12px;
+            color: var(--ozon-white);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        .submit-btn:hover {
+            background: var(--ozon-blue-dark);
+            transform: translateY(-2px);
+        }
+
+        .message {
+            background: rgba(0, 250, 170, 0.1);
+            border: 1px solid rgba(0, 250, 170, 0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #00FAAA;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.error {
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            color: #FF3B30;
+        }
+
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .faq-item {
+            background: rgba(60, 60, 62, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            background: rgba(60, 60, 62, 0.6);
+            border-color: var(--ozon-blue);
+        }
+
+        .faq-question {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-answer {
+            font-size: 14px;
+            color: var(--ozon-gray-50);
+            display: none;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        .faq-item.active .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        .forum-posts {
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .forum-post {
+            background: rgba(60, 60, 62, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            animation: slideUp 0.4s ease-out;
+            position: relative;
+        }
+
+        /* Стили для ответов администратора */
+        .admin-reply {
+            background: rgba(0, 91, 255, 0.1);
+            border-left: 3px solid var(--ozon-blue);
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .reply-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .admin-badge {
+            background: var(--ozon-blue);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .reply-date {
+            font-size: 12px;
+            color: var(--ozon-gray-50);
+        }
+
+        .reply-content {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .post-author {
+            font-weight: 600;
+            color: var(--ozon-blue);
+            font-size: 14px;
+        }
+
+        .post-date {
+            font-size: 12px;
+            color: var(--ozon-gray-50);
+            white-space: nowrap;
+        }
+
+        .post-content {
+            font-size: 14px;
+            line-height: 1.5;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .post-type {
+            display: inline-block;
+            padding: 4px 8px;
+            background: rgba(0, 91, 255, 0.2);
+            border-radius: 6px;
+            font-size: 12px;
+            margin-right: 8px;
+            color: var(--ozon-blue);
+        }
+
+        .post-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        .status-answered {
+            background: rgba(0, 184, 148, 0.1);
+            color: var(--ozon-green);
+            border: 1px solid rgba(0, 184, 148, 0.3);
+        }
+
+        .status-pending {
+            background: rgba(255, 149, 0, 0.1);
+            color: #FF9500;
+            border: 1px solid rgba(255, 149, 0, 0.3);
+        }
+
+        /* Стили для мобильной версии */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 12px 30px;
+            }
+            
+            .post-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .post-date {
+                align-self: flex-end;
+            }
+            
+            .forum-post {
+                padding: 12px;
+            }
+            
+            .glass-box {
+                padding: 16px;
+            }
+            
+            .post-content {
+                font-size: 15px;
+                line-height: 1.4;
+            }
+            
+            .form-input, .form-textarea {
+                font-size: 16px;
+                padding: 16px;
+            }
+            
+            .page-title {
+                font-size: 24px;
+            }
+            
+            .section-title {
+                font-size: 17px;
+            }
+            
+            .admin-reply {
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Стили для фильтрации */
+        .filter-badges {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-badge {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(60, 60, 62, 0.4);
+            border: 1px solid var(--glass-border);
+            color: var(--ozon-gray-50);
+        }
+        
+        .filter-badge.active {
+            background: var(--ozon-blue);
+            color: white;
+            border-color: var(--ozon-blue);
+        }
+        
+        .filter-badge:hover {
+            background: rgba(0, 91, 255, 0.2);
+            border-color: var(--ozon-blue);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--ozon-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn glass" onclick="window.history.back()">
+                <i class="fas fa-arrow-left"></i> Назад
+            </button>
+            <h1 class="page-title">
+                <i class="fas fa-question-circle" style="color: var(--ozon-blue);"></i> Помощь и поддержка
+            </h1>
+        </div>
+
+        <!-- Сообщения -->
+        <div id="message" class="message"></div>
+
+        <!-- Форма обратной связи -->
+        <div class="help-section">
+            <h2 class="section-title"><i class="fas fa-envelope"></i> Обратная связь</h2>
+            <div class="glass-box">
+                <div class="form-group">
+                    <label class="form-label">Тема обращения</label>
+                    <select class="form-input" id="feedbackType">
+                        <option value="question">Вопрос</option>
+                        <option value="problem">Проблема</option>
+                        <option value="suggestion">Предложение</option>
+                        <option value="complaint">Жалоба</option>
+                        <option value="other">Другое</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Ваше сообщение</label>
+                    <textarea class="form-textarea" id="feedbackMessage" placeholder="Опишите вашу проблему или вопрос подробно..."></textarea>
+                </div>
+                <button class="submit-btn" onclick="submitFeedback()">
+                    <span id="submitBtnText">Отправить</span>
+                    <div id="submitLoading" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="help-section">
+            <h2 class="section-title"><i class="fas fa-question"></i> Частые вопросы (FAQ)</h2>
+            <div class="glass-box">
+                <div class="faq-list">
+                    <div class="faq-item" onclick="toggleFaq(1)">
+                        <div class="faq-question">
+                            Как восстановить пароль?
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            На странице входа нажмите "Забыли пароль?" и следуйте инструкциям, которые придут на ваш email.
+                        </div>
+                    </div>
+                    <div class="faq-item" onclick="toggleFaq(2)">
+                        <div class="faq-question">
+                            Как изменить личные данные?
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            В профиле нажмите "Редактировать профиль" для изменения имени. Email можно изменить в настройках безопасности.
+                        </div>
+                    </div>
+                    <div class="faq-item" onclick="toggleFaq(3)">
+                        <div class="faq-question">
+                            Сколько времени занимает обработка заказа?
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Обычно обработка заказа занимает 1-2 рабочих дня. В праздничные периоды срок может увеличиться до 3-5 дней.
+                        </div>
+                    </div>
+                    <div class="faq-item" onclick="toggleFaq(4)">
+                        <div class="faq-question">
+                            Какие способы оплаты принимаются?
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Мы принимаем банковские карты (Visa, MasterCard, Мир), Apple Pay, Google Pay и СБП.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Форум обращений -->
+        <div class="help-section">
+            <h2 class="section-title"><i class="fas fa-comments"></i> Форум обращений</h2>
+            <div class="glass-box">
+                <div class="filter-badges">
+                    <div class="filter-badge active" onclick="filterPosts('all')">Все обращения</div>
+                    <div class="filter-badge" onclick="filterPosts('answered')">С ответами</div>
+                    <div class="filter-badge" onclick="filterPosts('pending')">Ожидают ответа</div>
+                    <div class="filter-badge" onclick="filterPosts('my')">Мои обращения</div>
+                </div>
+                <div class="forum-posts" id="forumPosts">
+                    <!-- Посты будут загружаться динамически -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Контакты -->
+        <div class="help-section">
+            <h2 class="section-title"><i class="fas fa-phone-alt"></i> Контакты поддержки</h2>
+            <div class="glass-box">
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div>
+                        <h4 style="color: var(--ozon-blue); margin-bottom: 4px;">Email</h4>
+                        <p>support@basement.com</p>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--ozon-blue); margin-bottom: 4px;">Телефон</h4>
+                        <p>8-800-555-35-35 (бесплатно по РФ)</p>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--ozon-blue); margin-bottom: 4px;">Рабочие часы</h4>
+                        <p>Пн-Пт: 9:00-21:00<br>Сб-Вс: 10:00-18:00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_XhDZ9rUv7wFlQkHMFwvkA5muZY4T-5I",
+            authDomain: "estels-86a9c.firebaseapp.com",
+            databaseURL: "https://estels-86a9c-default-rtdb.firebaseio.com",
+            projectId: "estels-86a9c",
+            storageBucket: "estels-86a9c.firebasestorage.app",
+            messagingSenderId: "886795277090",
+            appId: "1:886795277090:web:0e7cff9111d69e8b828b7b",
+            measurementId: "G-FCH1Y0WX17"
+        };
+
+        // Initialize Firebase
+        let auth, db;
+        
+        // Список нецензурных слов
+        const badWords = [
+            'мат1', 'мат2', 'мат3',
+            'хуй', 'пизда', 'бля', 'ебать', 'сука',
+            'fuck', 'shit', 'bitch', 'asshole'
+        ];
+        
+        // Текущий фильтр
+        let currentFilter = 'all';
+        let currentUser = null;
+        let isLoading = false;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Firebase
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            auth = firebase.auth();
+            db = firebase.firestore();
+            
+            // Check if user is logged in
+            auth.onAuthStateChanged((user) => {
+                if (!user) {
+                    showMessage('Для отправки обращений необходимо войти в аккаунт', 'error');
+                    document.querySelector('.submit-btn').disabled = true;
+                } else {
+                    currentUser = user;
+                    // Load forum posts
+                    loadForumPosts();
+                }
+            });
+            
+            // Update language based on setting
+            updateLanguage();
+        });
+        
+        function toggleFaq(index) {
+            const faqItem = document.querySelectorAll('.faq-item')[index - 1];
+            faqItem.classList.toggle('active');
+        }
+        
+        // Функция фильтрации нецензурной лексики
+        function filterBadWords(text) {
+            if (!text) return text;
+            
+            let filteredText = text;
+            badWords.forEach(word => {
+                const regex = new RegExp(word, 'gi');
+                filteredText = filteredText.replace(regex, '***');
+            });
+            return filteredText;
+        }
+        
+        function submitFeedback() {
+            const user = auth.currentUser;
+            if (!user) {
+                showMessage('Для отправки обращений необходимо войти в аккаунт', 'error');
+                return;
+            }
+            
+            const type = document.getElementById('feedbackType').value;
+            const message = document.getElementById('feedbackMessage').value.trim();
+            
+            if (!message) {
+                showMessage('Пожалуйста, введите сообщение', 'error');
+                return;
+            }
+            
+            // Проверка на нецензурную лексику
+            const filteredMessage = filterBadWords(message);
+            
+            if (filteredMessage !== message) {
+                showMessage('В сообщении обнаружены недопустимые слова. Они будут заменены.', 'error');
+            }
+            
+            // Show loading
+            const btnText = document.getElementById('submitBtnText');
+            const loading = document.getElementById('submitLoading');
+            btnText.style.display = 'none';
+            loading.style.display = 'block';
+            
+            // Get type label
+            const typeLabels = {
+                'question': 'Вопрос',
+                'problem': 'Проблема',
+                'suggestion': 'Предложение',
+                'complaint': 'Жалоба',
+                'other': 'Другое'
+            };
+            
+            const feedbackData = {
+                userId: user.uid,
+                userName: localStorage.getItem('userName') || user.displayName || 'Пользователь',
+                userEmail: user.email,
+                type: typeLabels[type],
+                message: filteredMessage,
+                answered: false,
+                status: 'pending',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                userEmail: user.email
+            };
+            
+            // Сохраняем в обе коллекции для синхронизации
+            const forumPromise = db.collection('forum').add(feedbackData);
+            const feedbackPromise = db.collection('feedback').add(feedbackData);
+            
+            Promise.all([forumPromise, feedbackPromise])
+            .then(() => {
+                showMessage('Спасибо за ваше обращение! Мы ответим вам в ближайшее время.', 'success');
+                document.getElementById('feedbackMessage').value = '';
+                
+                // Перезагружаем форум
+                loadForumPosts();
+            })
+            .catch((error) => {
+                console.error('Ошибка отправки:', error);
+                showMessage('Ошибка отправки. Пожалуйста, попробуйте позже.', 'error');
+            })
+            .finally(() => {
+                // Hide loading
+                btnText.style.display = 'block';
+                loading.style.display = 'none';
+            });
+        }
+        
+        function loadForumPosts(filter = 'all') {
+            if (isLoading) return;
+            
+            isLoading = true;
+            currentFilter = filter;
+            const forumPosts = document.getElementById('forumPosts');
+            forumPosts.innerHTML = '<p style="text-align: center; color: var(--ozon-gray-50); padding: 40px 0;"><span class="loading-spinner"></span> Загрузка обращений...</p>';
+            
+            // Обновляем активный фильтр
+            document.querySelectorAll('.filter-badge').forEach(badge => {
+                badge.classList.remove('active');
+            });
+            
+            // Определяем индекс активного фильтра
+            let filterIndex = 0;
+            if (filter === 'answered') filterIndex = 1;
+            else if (filter === 'pending') filterIndex = 2;
+            else if (filter === 'my') filterIndex = 3;
+            
+            document.querySelectorAll('.filter-badge')[filterIndex].classList.add('active');
+            
+            // Загружаем все посты и фильтруем на клиенте (чтобы избежать ошибок индексов)
+            db.collection('forum')
+                .orderBy('createdAt', 'desc')
+                .limit(50)
+                .get()
+                .then((querySnapshot) => {
+                    if (querySnapshot.empty) {
+                        const message = filter === 'my' ? 
+                            'У вас пока нет обращений' : 
+                            'Пока нет обращений. Будьте первым!';
+                        forumPosts.innerHTML = `<p style="text-align: center; color: var(--ozon-gray-50); padding: 40px 0;">${message}</p>`;
+                        isLoading = false;
+                        return;
+                    }
+                    
+                    let posts = [];
+                    querySnapshot.forEach((doc) => {
+                        const post = doc.data();
+                        post.id = doc.id;
+                        posts.push(post);
+                    });
+                    
+                    // Применяем фильтры на клиенте
+                    let filteredPosts = posts;
+                    
+                    if (filter === 'answered') {
+                        filteredPosts = posts.filter(post => post.answered === true);
+                    } else if (filter === 'pending') {
+                        filteredPosts = posts.filter(post => post.answered !== true);
+                    } else if (filter === 'my' && currentUser) {
+                        filteredPosts = posts.filter(post => post.userId === currentUser.uid);
+                    }
+                    
+                    displayPosts(filteredPosts);
+                    isLoading = false;
+                })
+                .catch((error) => {
+                    console.error('Ошибка загрузки форума:', error);
+                    
+                    // Если ошибка индексов, пытаемся загрузить без сортировки
+                    db.collection('forum')
+                        .limit(20)
+                        .get()
+                        .then((querySnapshot) => {
+                            let posts = [];
+                            querySnapshot.forEach((doc) => {
+                                const post = doc.data();
+                                post.id = doc.id;
+                                posts.push(post);
+                            });
+                            
+                            // Сортируем на клиенте
+                            posts.sort((a, b) => {
+                                const dateA = a.createdAt ? a.createdAt.toDate().getTime() : 0;
+                                const dateB = b.createdAt ? b.createdAt.toDate().getTime() : 0;
+                                return dateB - dateA;
+                            });
+                            
+                            // Применяем фильтры
+                            let filteredPosts = posts;
+                            
+                            if (filter === 'answered') {
+                                filteredPosts = posts.filter(post => post.answered === true);
+                            } else if (filter === 'pending') {
+                                filteredPosts = posts.filter(post => post.answered !== true);
+                            } else if (filter === 'my' && currentUser) {
+                                filteredPosts = posts.filter(post => post.userId === currentUser.uid);
+                            }
+                            
+                            displayPosts(filteredPosts);
+                            isLoading = false;
+                        })
+                        .catch((secondError) => {
+                            console.error('Вторая ошибка загрузки:', secondError);
+                            forumPosts.innerHTML = '<p style="text-align: center; color: #FF3B30; padding: 40px 0;">Ошибка загрузки обращений. Пожалуйста, обновите страницу.</p>';
+                            isLoading = false;
+                        });
+                });
+        }
+        
+        function displayPosts(posts) {
+            const forumPosts = document.getElementById('forumPosts');
+            
+            if (posts.length === 0) {
+                const message = currentFilter === 'my' ? 
+                    'У вас пока нет обращений' : 
+                    currentFilter === 'answered' ? 'Нет обращений с ответами' :
+                    currentFilter === 'pending' ? 'Нет обращений без ответов' :
+                    'Пока нет обращений. Будьте первым!';
+                forumPosts.innerHTML = `<p style="text-align: center; color: var(--ozon-gray-50); padding: 40px 0;">${message}</p>`;
+                return;
+            }
+            
+            let html = '';
+            posts.forEach((post) => {
+                // Форматируем текст с переносами строк
+                const formattedContent = post.message ? post.message.replace(/\n/g, '<br>') : '';
+                
+                html += `
+                    <div class="forum-post">
+                        <div class="post-header">
+                            <div>
+                                <span class="post-type">${post.type || 'Обращение'}</span>
+                                <span class="post-author">${post.userName || 'Пользователь'}</span>
+                                ${post.answered ? 
+                                    '<span class="post-status status-answered">Ответ получен</span>' : 
+                                    '<span class="post-status status-pending">Ожидает ответа</span>'}
+                            </div>
+                            <span class="post-date">${formatDate(post.createdAt)}</span>
+                        </div>
+                        <div class="post-content">${formattedContent}</div>
+                        ${post.answered && post.adminReply ? `
+                            <div class="admin-reply">
+                                <div class="reply-header">
+                                    <span class="admin-badge">Администратор ${post.adminReplier ? '(' + post.adminReplier + ')' : ''}</span>
+                                    <span class="reply-date">${post.replyDate ? formatDate(post.replyDate) : ''}</span>
+                                </div>
+                                <div class="reply-content">${post.adminReply.replace(/\n/g, '<br>')}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            forumPosts.innerHTML = html;
+        }
+        
+        function filterPosts(filterType) {
+            loadForumPosts(filterType);
+        }
+        
+        function formatDate(timestamp) {
+            if (!timestamp) return '';
+            
+            try {
+                let date;
+                if (timestamp.toDate) {
+                    date = timestamp.toDate();
+                } else if (timestamp instanceof Date) {
+                    date = timestamp;
+                } else if (timestamp.seconds) {
+                    date = new Date(timestamp.seconds * 1000);
+                } else {
+                    return 'Не указано';
+                }
+                
+                const now = new Date();
+                const diff = now - date;
+                
+                // Если меньше 24 часов
+                if (diff < 24 * 60 * 60 * 1000) {
+                    const hours = date.getHours().toString().padStart(2, '0');
+                    const minutes = date.getMinutes().toString().padStart(2, '0');
+                    return `Сегодня в ${hours}:${minutes}`;
+                }
+                
+                // Если меньше 48 часов
+                if (diff < 2 * 24 * 60 * 60 * 1000) {
+                    const hours = date.getHours().toString().padStart(2, '0');
+                    const minutes = date.getMinutes().toString().padStart(2, '0');
+                    return `Вчера в ${hours}:${minutes}`;
+                }
+                
+                // Если меньше недели
+                if (diff < 7 * 24 * 60 * 60 * 1000) {
+                    const days = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+                    const dayName = days[date.getDay()];
+                    const hours = date.getHours().toString().padStart(2, '0');
+                    const minutes = date.getMinutes().toString().padStart(2, '0');
+                    return `${dayName} в ${hours}:${minutes}`;
+                }
+                
+                // Иначе показываем полную дату
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const year = date.getFullYear();
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                return `${day}.${month}.${year} ${hours}:${minutes}`;
+            } catch (error) {
+                console.error('Ошибка форматирования даты:', error);
+                return 'Не указано';
+            }
+        }
+        
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = type === 'error' ? 'message error' : 'message';
+            messageEl.style.display = 'block';
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 5000);
+        }
+        
+        function updateLanguage() {
+            const lang = localStorage.getItem('appLanguage') || 'ru';
+            if (lang === 'en') {
+                // Translate to English
+                document.querySelector('.page-title').innerHTML = '<i class="fas fa-question-circle" style="color: var(--ozon-blue);"></i> Help & Support';
+                document.querySelector('.back-btn').innerHTML = '<i class="fas fa-arrow-left"></i> Back';
+                document.querySelectorAll('.section-title')[0].innerHTML = '<i class="fas fa-envelope"></i> Feedback Form';
+                document.querySelectorAll('.section-title')[1].innerHTML = '<i class="fas fa-question"></i> Frequently Asked Questions';
+                document.querySelectorAll('.section-title')[2].innerHTML = '<i class="fas fa-comments"></i> Support Forum';
+                document.querySelectorAll('.section-title')[3].innerHTML = '<i class="fas fa-phone-alt"></i> Contact Support';
+                document.querySelector('#submitBtnText').textContent = 'Submit';
+                document.querySelector('#feedbackMessage').placeholder = 'Describe your problem or question in detail...';
+                
+                // Update FAQ
+                document.querySelectorAll('.faq-question')[0].innerHTML = 'How to reset password?<i class="fas fa-chevron-down"></i>';
+                document.querySelectorAll('.faq-answer')[0].textContent = 'On the login page, click "Forgot password?" and follow the instructions sent to your email.';
+                document.querySelectorAll('.faq-question')[1].innerHTML = 'How to change personal information?<i class="fas fa-chevron-down"></i>';
+                document.querySelectorAll('.faq-answer')[1].textContent = 'In profile, click "Edit Profile" to change name. Email can be changed in security settings.';
+                document.querySelectorAll('.faq-question')[2].innerHTML = 'How long does order processing take?<i class="fas fa-chevron-down"></i>';
+                document.querySelectorAll('.faq-answer')[2].textContent = 'Order processing usually takes 1-2 business days. During holidays, it may take 3-5 days.';
+                document.querySelectorAll('.faq-question')[3].innerHTML = 'What payment methods are accepted?<i class="fas fa-chevron-down"></i>';
+                document.querySelectorAll('.faq-answer')[3].textContent = 'We accept bank cards (Visa, MasterCard, Mir), Apple Pay, Google Pay and SBP.';
+                
+                // Update contacts
+                document.querySelectorAll('h4')[0].textContent = 'Email';
+                document.querySelectorAll('h4')[1].textContent = 'Phone';
+                document.querySelectorAll('h4')[2].textContent = 'Working Hours';
+                document.querySelectorAll('p')[4].innerHTML = 'Mon-Fri: 9:00-21:00<br>Sat-Sun: 10:00-18:00';
+                
+                // Update filter badges
+                document.querySelectorAll('.filter-badge')[0].textContent = 'All requests';
+                document.querySelectorAll('.filter-badge')[1].textContent = 'With answers';
+                document.querySelectorAll('.filter-badge')[2].textContent = 'Awaiting response';
+                document.querySelectorAll('.filter-badge')[3].textContent = 'My requests';
+            }
+        }
+        
+        // Функция для создания индексов (вызывается один раз из консоли браузера)
+        function createIndexes() {
+            console.log('Для создания индексов перейдите по ссылке из ошибки в консоли Firebase');
+            console.log('Или создайте индекс вручную в Firebase Console:');
+            console.log('1. Откройте Firebase Console');
+            console.log('2. Выберите проект estels-86a9c');
+            console.log('3. Перейдите в Firestore Database');
+            console.log('4. Перейдите на вкладку Indexes');
+            console.log('5. Создайте composite index для коллекции forum с полями:');
+            console.log('   - answered (Ascending)');
+            console.log('   - createdAt (Descending)');
+        }
+    </script>
+</body>
+</html>

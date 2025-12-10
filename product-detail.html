@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basement | Детали товара</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Добавьте стили из вашей детальной страницы товара */
+        body {
+            background: #1A1A1A;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .back-btn {
+            margin-bottom: 20px;
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .product-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .product-price {
+            font-size: 28px;
+            font-weight: 800;
+            color: #005BFF;
+            margin-bottom: 20px;
+        }
+        
+        .product-description {
+            color: #8E8E93;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" onclick="window.history.back()">
+            <i class="fas fa-arrow-left"></i> Назад
+        </button>
+        
+        <div id="productDetail">
+            <!-- Данные будут загружены через JavaScript -->
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Получаем ID товара из URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+            
+            // Получаем данные товара из localStorage
+            const productData = JSON.parse(localStorage.getItem('currentProduct') || '{}');
+            
+            if (productData.id === productId) {
+                // Отображаем данные товара
+                document.getElementById('productDetail').innerHTML = `
+                    <img src="${productData.image}" alt="${productData.name}" class="product-image">
+                    <h1 class="product-title">${productData.name}</h1>
+                    <div class="product-price">${productData.price ? productData.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : '0'} ₽</div>
+                    <p class="product-description">${productData.desc || 'Описание отсутствует'}</p>
+                `;
+            } else {
+                document.getElementById('productDetail').innerHTML = `
+                    <p>Товар не найден</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Basement | Профиль</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --ozon-blue: #005BFF;
+            --ozon-blue-dark: #004ECC;
+            --ozon-gray-10: #1A1A1A;
+            --ozon-gray-20: #2C2C2E;
+            --ozon-gray-30: #3C3C3E;
+            --ozon-gray-40: #48484A;
+            --ozon-gray-50: #8E8E93;
+            --ozon-white: #FFFFFF;
+            --glass-bg: rgba(44, 44, 46, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --success-green: #34C759;
+            --warning-yellow: #FF9500;
+            --error-red: #FF3B30;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
+            color: var(--ozon-white);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 91, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 153, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+        }
+
+        .header {
+            padding: 20px 0 16px;
+            margin-bottom: 4px;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            color: var(--ozon-white);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 12px 16px;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            margin-bottom: 16px;
+            width: fit-content;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(44, 44, 46, 0.9);
+            border-color: var(--ozon-blue);
+            transform: translateY(-2px);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Стили для окна логина/информации */
+        .user-window {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px 32px;
+            margin-bottom: 32px;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        /* Стили для окна логина (если пользователь не зарегистрирован) */
+        .login-container {
+            text-align: center;
+        }
+
+        .login-logo {
+            font-size: 42px;
+            color: var(--ozon-blue);
+            margin-bottom: 20px;
+        }
+
+        .login-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .login-subtitle {
+            color: var(--ozon-gray-50);
+            font-size: 15px;
+            margin-bottom: 32px;
+        }
+
+        .login-form {
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--ozon-gray-50);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 18px;
+            background: rgba(60, 60, 62, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--ozon-white);
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--ozon-blue);
+            box-shadow: 0 0 0 2px rgba(0, 91, 255, 0.2);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--ozon-blue);
+            border: none;
+            border-radius: 12px;
+            color: var(--ozon-white);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .login-btn:hover {
+            background: var(--ozon-blue-dark);
+            transform: translateY(-2px);
+        }
+
+        .register-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--ozon-gray-30);
+            border: none;
+            border-radius: 12px;
+            color: var(--ozon-white);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .register-btn:hover {
+            background: var(--ozon-gray-40);
+            transform: translateY(-2px);
+        }
+
+        .login-message {
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            border-radius: 12px;
+            padding: 14px 18px;
+            color: #FF3B30;
+            font-size: 14px;
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        .login-message.success {
+            background: rgba(0, 250, 170, 0.1);
+            border: 1px solid rgba(0, 250, 170, 0.3);
+            color: #00FAAA;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .forgot-password a {
+            color: var(--ozon-blue);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        /* Стили для окна информации о пользователе (если зарегистрирован) */
+        .user-info-container {
+            text-align: center;
+        }
+
+        .user-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--ozon-blue), var(--ozon-blue-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .user-email {
+            color: var(--ozon-gray-50);
+            font-size: 15px;
+            margin-bottom: 24px;
+        }
+
+        .user-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 32px;
+            padding: 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--ozon-blue);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--ozon-gray-50);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-btn.primary {
+            background: var(--ozon-blue);
+            color: var(--ozon-white);
+        }
+
+        .action-btn.primary:hover {
+            background: var(--ozon-blue-dark);
+            transform: translateY(-2px);
+        }
+
+        .action-btn.secondary {
+            background: var(--ozon-gray-30);
+            color: var(--ozon-white);
+        }
+
+        .action-btn.secondary:hover {
+            background: var(--ozon-gray-40);
+            transform: translateY(-2px);
+        }
+
+        /* Стили для остального контента профиля */
+        .profile-content {
+            display: none;
+        }
+
+        .profile-content.active {
+            display: block;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .orders-section {
+            margin-bottom: 32px;
+            animation: slideUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .orders-section:nth-child(1) { animation-delay: 0.1s; }
+        .orders-section:nth-child(2) { animation-delay: 0.2s; }
+        .orders-section:nth-child(3) { animation-delay: 0.3s; }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-left: 8px;
+        }
+
+        .orders-list {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            max-height: 400px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--ozon-gray-40) var(--ozon-gray-20);
+        }
+
+        .orders-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .orders-list::-webkit-scrollbar-track {
+            background: var(--ozon-gray-20);
+            border-radius: 3px;
+        }
+
+        .orders-list::-webkit-scrollbar-thumb {
+            background: var(--ozon-gray-40);
+            border-radius: 3px;
+        }
+
+        .order-card {
+            padding: 20px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+            position: relative;
+        }
+
+        .order-card.expiring {
+            background: rgba(255, 149, 0, 0.05);
+            border-left: 3px solid var(--warning-yellow);
+        }
+
+        .order-card.expiring-soon {
+            background: rgba(255, 59, 48, 0.05);
+            border-left: 3px solid var(--error-red);
+        }
+
+        .order-card:last-child {
+            border-bottom: none;
+        }
+
+        .order-card:hover {
+            background: rgba(60, 60, 62, 0.4);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .order-number {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--ozon-white);
+        }
+
+        .order-date {
+            font-size: 14px;
+            color: var(--ozon-gray-50);
+        }
+
+        .order-status {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .status-pending {
+            background: rgba(255, 149, 0, 0.1);
+            color: var(--warning-yellow);
+            border: 1px solid rgba(255, 149, 0, 0.3);
+        }
+
+        .status-approved {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--success-green);
+            border: 1px solid rgba(52, 199, 89, 0.3);
+        }
+
+        .status-rejected {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--error-red);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+        }
+
+        .status-delivered {
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--ozon-blue);
+            border: 1px solid rgba(0, 122, 255, 0.3);
+        }
+
+        .order-info {
+            margin-bottom: 12px;
+        }
+
+        .order-total {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--ozon-white);
+            margin-bottom: 8px;
+        }
+
+        .order-items {
+            font-size: 14px;
+            color: var(--ozon-gray-50);
+            background: rgba(60, 60, 62, 0.3);
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        .order-item-name {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .order-item-name:last-child {
+            margin-bottom: 0;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .order-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-view {
+            background: rgba(0, 91, 255, 0.1);
+            color: var(--ozon-blue);
+            border: 1px solid rgba(0, 91, 255, 0.3);
+        }
+
+        .btn-view:hover {
+            background: rgba(0, 91, 255, 0.2);
+        }
+
+        .btn-track {
+            background: rgba(0, 184, 148, 0.1);
+            color: #00B894;
+            border: 1px solid rgba(0, 184, 148, 0.3);
+        }
+
+        .btn-track:hover {
+            background: rgba(0, 184, 148, 0.2);
+        }
+
+        .delivery-status {
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(60, 60, 62, 0.3);
+            border-radius: 8px;
+            border-left: 3px solid var(--ozon-blue);
+        }
+
+        .delivery-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .delivery-info {
+            font-size: 13px;
+            color: var(--ozon-gray-50);
+        }
+
+        .delivery-date {
+            font-size: 12px;
+            color: var(--ozon-gray-50);
+            margin-top: 4px;
+        }
+
+        .timer {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--ozon-white);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            backdrop-filter: blur(10px);
+        }
+
+        .timer.warning {
+            color: var(--warning-yellow);
+            background: rgba(255, 149, 0, 0.2);
+        }
+
+        .timer.danger {
+            color: var(--error-red);
+            background: rgba(255, 59, 48, 0.2);
+            animation: pulse 1s infinite;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--ozon-gray-50);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--ozon-white);
+        }
+
+        .settings-section {
+            margin-bottom: 32px;
+            animation: slideUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .settings-list {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .settings-item {
+            padding: 20px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-item:hover {
+            background: rgba(60, 60, 62, 0.4);
+        }
+
+        .item-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .item-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(60, 60, 62, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ozon-blue);
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .settings-item:hover .item-icon {
+            background: rgba(0, 91, 255, 0.15);
+            border-color: var(--ozon-blue);
+            transform: scale(1.05);
+        }
+
+        .item-text h4 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .item-text p {
+            font-size: 13px;
+            color: var(--ozon-gray-50);
+        }
+
+        .item-arrow {
+            color: var(--ozon-gray-50);
+            transition: transform 0.3s ease;
+        }
+
+        .settings-item:hover .item-arrow {
+            transform: translateX(4px);
+            color: var(--ozon-white);
+        }
+
+        .language-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(60, 60, 62, 0.6);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            margin-top: 8px;
+        }
+
+        .language-btn {
+            flex: 1;
+            padding: 10px 16px;
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--ozon-gray-50);
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .language-btn.active {
+            background: var(--ozon-blue);
+            color: var(--ozon-white);
+            border-color: var(--ozon-blue);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 15px 20px;
+            max-width: 350px;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-icon {
+            font-size: 20px;
+        }
+
+        .notification.success .notification-icon {
+            color: var(--success-green);
+        }
+
+        .notification.warning .notification-icon {
+            color: var(--warning-yellow);
+        }
+
+        .notification.error .notification-icon {
+            color: var(--error-red);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle notification-icon"></i>
+        <span id="notificationText">Уведомление</span>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> На главную
+            </a>
+            <h1 class="page-title">
+                <i class="fas fa-user" style="color: var(--ozon-blue);"></i> Профиль
+            </h1>
+        </div>
+
+        <!-- Окно пользователя (логин или информация) -->
+        <div class="user-window" id="userWindow">
+            <!-- Контейнер для логина (показывается если пользователь не залогинен) -->
+            <div class="login-container" id="loginContainer">
+                <div class="login-logo">
+                    <i class="fas fa-store"></i>
+                </div>
+                <h2 class="login-title">Войдите в аккаунт</h2>
+                <p class="login-subtitle">Чтобы просматривать заказы и настройки</p>
+                
+                <div id="loginMessage" class="login-message"></div>
+                
+                <form id="loginForm" class="login-form" onsubmit="login(event)">
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="loginEmail" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Пароль</label>
+                        <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="login-btn" id="loginBtn">
+                        <span id="loginBtnText">Войти</span>
+                        <i class="fas fa-sign-in-alt"></i>
+                    </button>
+                    
+                    <button type="button" class="register-btn" onclick="goToRegister()">
+                        <i class="fas fa-user-plus"></i> Создать аккаунт
+                    </button>
+                    
+                    <div class="forgot-password">
+                        <a href="javascript:void(0)" onclick="sendPasswordReset()">Забыли пароль?</a>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Контейнер с информацией о пользователе (показывается если пользователь залогинен) -->
+            <div class="user-info-container" id="userInfoContainer" style="display: none;">
+                <div class="user-avatar" id="userAvatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h2 class="user-name" id="userName">Загрузка...</h2>
+                <p class="user-email" id="userEmail">Загрузка...</p>
+                
+                <div class="user-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="ordersCount">0</div>
+                        <div class="stat-label">Заказов</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="approvedCount">0</div>
+                        <div class="stat-label">Одобрено</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="pendingCount">0</div>
+                        <div class="stat-label">На проверке</div>
+                    </div>
+                </div>
+                
+                <div class="user-actions">
+                    <button class="action-btn primary" onclick="editProfile()">
+                        <i class="fas fa-edit"></i> Редактировать
+                    </button>
+                    <button class="action-btn secondary" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Контент профиля (показывается только для залогиненных пользователей) -->
+        <div class="profile-content" id="profileContent">
+            <div class="orders-section">
+                <h3 class="section-title"><i class="fas fa-check-circle" style="color: var(--success-green);"></i> Одобренные заказы</h3>
+                <div class="orders-list" id="approvedOrdersList">
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <h4>Нет одобренных заказов</h4>
+                        <p>Здесь появятся ваши подтвержденные заказы</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="orders-section">
+                <h3 class="section-title"><i class="fas fa-clock" style="color: var(--warning-yellow);"></i> Заказы на проверке</h3>
+                <div class="orders-list" id="pendingOrdersList">
+                    <div class="empty-state">
+                        <i class="fas fa-clock"></i>
+                        <h4>Нет заказов на проверке</h4>
+                        <p>Здесь появятся заказы, ожидающие проверки</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="orders-section">
+                <h3 class="section-title"><i class="fas fa-times-circle" style="color: var(--error-red);"></i> Отклоненные заказы</h3>
+                <div class="orders-list" id="rejectedOrdersList">
+                    <div class="empty-state">
+                        <i class="fas fa-times-circle"></i>
+                        <h4>Нет отклоненных заказов</h4>
+                        <p>Здесь появятся отклоненные заказы</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3 class="section-title"><i class="fas fa-cog"></i> Настройки</h3>
+                <div class="settings-list">
+                    <div class="settings-item">
+                        <div class="item-content">
+                            <div class="item-icon">
+                                <i class="fas fa-language"></i>
+                            </div>
+                            <div class="item-text">
+                                <h4>Язык</h4>
+                                <p>Выберите язык приложения</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                    <div class="language-selector">
+                        <button class="language-btn active" onclick="changeLanguage('ru')">Русский</button>
+                        <button class="language-btn" onclick="changeLanguage('en')">English</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3 class="section-title"><i class="fas fa-question-circle"></i> Помощь</h3>
+                <div class="settings-list">
+                    <div class="settings-item" onclick="openHelp()">
+                        <div class="item-content">
+                            <div class="item-icon">
+                                <i class="fas fa-question"></i>
+                            </div>
+                            <div class="item-text">
+                                <h4>Помощь и поддержка</h4>
+                                <p>Частые вопросы и контакты</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+
+                    <div class="settings-item" onclick="openAbout()">
+                        <div class="item-content">
+                            <div class="item-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="item-text">
+                                <h4>О приложении</h4>
+                                <p>Версия 1.0.0</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_XhDZ9rUv7wFlQkHMFwvkA5muZY4T-5I",
+            authDomain: "estels-86a9c.firebaseapp.com",
+            databaseURL: "https://estels-86a9c-default-rtdb.firebaseio.com",
+            projectId: "estels-86a9c",
+            storageBucket: "estels-86a9c.firebasestorage.app",
+            messagingSenderId: "886795277090",
+            appId: "1:886795277090:web:0e7cff9111d69e8b828b7b",
+            measurementId: "G-FCH1Y0WX17"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+        
+        let timers = {};
+        const EXPIRY_TIME = 10 * 60 * 1000;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    // Пользователь залогинен - показываем информацию о пользователе
+                    showUserInfo(user);
+                    loadUserProfile(user);
+                    loadUserOrders(user.uid);
+                } else {
+                    // Пользователь не залогинен - показываем окно логина
+                    showLoginForm();
+                }
+            });
+            
+            const language = localStorage.getItem('appLanguage') || 'ru';
+            updateLanguage(language);
+        });
+
+        function showLoginForm() {
+            document.getElementById('loginContainer').style.display = 'block';
+            document.getElementById('userInfoContainer').style.display = 'none';
+            document.getElementById('profileContent').classList.remove('active');
+        }
+
+        function showUserInfo(user) {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('userInfoContainer').style.display = 'block';
+            document.getElementById('profileContent').classList.add('active');
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const icon = notification.querySelector('.notification-icon');
+            const text = document.getElementById('notificationText');
+            
+            text.textContent = message;
+            notification.className = 'notification';
+            notification.classList.add(type);
+            
+            if (type === 'success') {
+                icon.className = 'fas fa-check-circle notification-icon';
+            } else if (type === 'warning') {
+                icon.className = 'fas fa-exclamation-triangle notification-icon';
+            } else {
+                icon.className = 'fas fa-times-circle notification-icon';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function showLoginMessage(message, type = 'error') {
+            const messageEl = document.getElementById('loginMessage');
+            messageEl.textContent = message;
+            messageEl.className = 'login-message ' + type;
+            messageEl.style.display = 'block';
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageEl.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function login(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const btn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('loginBtnText');
+            const originalText = btnText.textContent;
+            
+            btnText.textContent = 'Вход...';
+            btn.disabled = true;
+            
+            showLoginMessage('', '');
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    
+                    if (!user.emailVerified) {
+                        showLoginMessage('Ваш email не подтвержден! Пожалуйста, проверьте вашу почту.', 'error');
+                        return auth.signOut();
+                    }
+                    
+                    return database.ref(`users/${user.uid}`).update({
+                        lastLogin: Date.now()
+                    }).then(() => {
+                        showLoginMessage('Успешный вход!', 'success');
+                        showUserInfo(user);
+                        loadUserProfile(user);
+                        loadUserOrders(user.uid);
+                    });
+                })
+                .catch((error) => {
+                    console.error("Ошибка входа:", error);
+                    let errorMessage = 'Ошибка входа';
+                    
+                    switch(error.code) {
+                        case 'auth/user-not-found':
+                            errorMessage = 'Пользователь не найден';
+                            break;
+                        case 'auth/wrong-password':
+                            errorMessage = 'Неверный пароль';
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = 'Неверный формат email';
+                            break;
+                        case 'auth/user-disabled':
+                            errorMessage = 'Аккаунт отключен';
+                            break;
+                        case 'auth/too-many-requests':
+                            errorMessage = 'Слишком много попыток. Подождите 5 минут';
+                            break;
+                        default:
+                            errorMessage = `Ошибка: ${error.message}`;
+                    }
+                    
+                    showLoginMessage(errorMessage, 'error');
+                })
+                .finally(() => {
+                    btnText.textContent = originalText;
+                    btn.disabled = false;
+                });
+        }
+
+        function loadUserProfile(user) {
+            database.ref(`users/${user.uid}`).once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    document.getElementById('userName').textContent = userData.name || 'Пользователь';
+                    document.getElementById('userEmail').textContent = user.email;
+                    
+                    localStorage.setItem('userName', userData.name || 'Пользователь');
+                    localStorage.setItem('userEmail', user.email);
+                } else {
+                    const userData = {
+                        name: user.displayName || 'Пользователь',
+                        email: user.email,
+                        createdAt: Date.now(),
+                        lastLogin: Date.now()
+                    };
+                    
+                    database.ref(`users/${user.uid}`).set(userData);
+                    
+                    document.getElementById('userName').textContent = userData.name;
+                    document.getElementById('userEmail').textContent = user.email;
+                    
+                    localStorage.setItem('userName', userData.name);
+                    localStorage.setItem('userEmail', user.email);
+                }
+            }).catch((error) => {
+                console.error('Ошибка загрузки данных пользователя:', error);
+                document.getElementById('userName').textContent = user.displayName || 'Пользователь';
+                document.getElementById('userEmail').textContent = user.email;
+            });
+        }
+
+        async function loadUserOrders(userId) {
+            try {
+                const ordersRef = database.ref(`orders/${userId}`);
+                
+                ordersRef.on('value', (snapshot) => {
+                    const orders = [];
+                    if (snapshot.exists()) {
+                        snapshot.forEach((childSnapshot) => {
+                            const order = childSnapshot.val();
+                            order.id = childSnapshot.key;
+                            orders.push(order);
+                        });
+                    }
+                    
+                    orders.sort((a, b) => b.createdAt - a.createdAt);
+                    
+                    // Обновляем статистику
+                    updateUserStats(orders);
+                    
+                    renderOrders(orders);
+                });
+                
+            } catch (error) {
+                console.error('Ошибка загрузки заказов:', error);
+                showNotification('Ошибка загрузки заказов', 'error');
+            }
+        }
+
+        function updateUserStats(orders) {
+            const totalOrders = orders.length;
+            const approvedOrders = orders.filter(order => 
+                order.status === 'approved' || order.status === 'delivered' || order.status === 'paid'
+            ).length;
+            const pendingOrders = orders.filter(order => 
+                order.status === 'pending_verification' || order.status === 'pending_payment'
+            ).length;
+            
+            document.getElementById('ordersCount').textContent = totalOrders;
+            document.getElementById('approvedCount').textContent = approvedOrders;
+            document.getElementById('pendingCount').textContent = pendingOrders;
+        }
+
+        function renderOrders(orders) {
+            const approvedOrders = orders.filter(order => order.status === 'approved' || order.status === 'delivered' || order.status === 'paid');
+            const pendingOrders = orders.filter(order => order.status === 'pending_verification' || order.status === 'pending_payment');
+            const rejectedOrders = orders.filter(order => order.status === 'rejected');
+            
+            const approvedList = document.getElementById('approvedOrdersList');
+            if (approvedOrders.length > 0) {
+                approvedList.innerHTML = approvedOrders.map(order => createOrderCard(order)).join('');
+            } else {
+                approvedList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <h4>Нет одобренных заказов</h4>
+                        <p>Здесь появятся ваши подтвержденные заказы</p>
+                    </div>
+                `;
+            }
+            
+            const pendingList = document.getElementById('pendingOrdersList');
+            if (pendingOrders.length > 0) {
+                pendingList.innerHTML = pendingOrders.map(order => createOrderCard(order)).join('');
+                startExpiryTimers(pendingOrders, 'pending');
+            } else {
+                pendingList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-clock"></i>
+                        <h4>Нет заказов на проверке</h4>
+                        <p>Здесь появятся заказы, ожидающие проверки</p>
+                    </div>
+                `;
+            }
+            
+            const rejectedList = document.getElementById('rejectedOrdersList');
+            if (rejectedOrders.length > 0) {
+                rejectedList.innerHTML = rejectedOrders.map(order => createOrderCard(order)).join('');
+                startExpiryTimers(rejectedOrders, 'rejected');
+            } else {
+                rejectedList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-times-circle"></i>
+                        <h4>Нет отклоненных заказов</h4>
+                        <p>Здесь появятся отклоненные заказы</p>
+                    </div>
+                `;
+            }
+        }
+
+        function createOrderCard(order) {
+            const date = new Date(order.createdAt).toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            const statusText = getStatusText(order.status);
+            const statusClass = getStatusClass(order.status);
+            
+            const itemsCount = order.items ? order.items.length : 0;
+            const itemsText = itemsCount === 1 ? '1 товар' : `${itemsCount} товара`;
+            
+            let itemsList = '';
+            if (order.items && order.items.length > 0) {
+                itemsList = '<div class="order-items">';
+                order.items.slice(0, 3).forEach(item => {
+                    itemsList += `
+                        <div class="order-item-name">
+                            <span>${escapeHtml(item.name || 'Товар')}</span>
+                            <span>${formatPrice(item.price || 0)} ₽ × ${item.quantity || 1}</span>
+                        </div>
+                    `;
+                });
+                if (order.items.length > 3) {
+                    itemsList += `<div style="color: var(--ozon-gray-50); font-size: 12px; text-align: center; margin-top: 4px;">и еще ${order.items.length - 3} товаров</div>`;
+                }
+                itemsList += '</div>';
+            }
+            
+            let actions = '';
+            let deliveryInfo = '';
+            
+            if (order.status === 'approved') {
+                actions = `
+                    <div class="order-actions">
+                        <button class="order-btn btn-track" onclick="trackOrder('${order.id}')">
+                            <i class="fas fa-truck"></i> Отследить
+                        </button>
+                    </div>
+                `;
+                
+                const deliveryDate = new Date(order.createdAt + 3 * 24 * 60 * 60 * 1000);
+                const formattedDeliveryDate = deliveryDate.toLocaleDateString('ru-RU', {
+                    day: 'numeric',
+                    month: 'long'
+                });
+                
+                deliveryInfo = `
+                    <div class="delivery-status">
+                        <div class="delivery-title">
+                            <i class="fas fa-truck"></i>
+                            <span>Доставка ожидается ${formattedDeliveryDate}</span>
+                        </div>
+                        <div class="delivery-info">
+                            Адрес доставки: ${order.customer?.address || 'Не указан'}
+                        </div>
+                    </div>
+                `;
+            } else if (order.status === 'delivered') {
+                const deliveredDate = order.deliveredAt ? 
+                    new Date(order.deliveredAt).toLocaleDateString('ru-RU', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                    }) : 'Неизвестно';
+                
+                deliveryInfo = `
+                    <div class="delivery-status">
+                        <div class="delivery-title">
+                            <i class="fas fa-check-circle" style="color: var(--success-green);"></i>
+                            <span>Доставлен ${deliveredDate}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            const cardClass = ['pending_verification', 'pending_payment', 'rejected'].includes(order.status) ? 
+                'expiring' : '';
+            
+            const timerHtml = ['pending_verification', 'pending_payment', 'rejected'].includes(order.status) ? 
+                `<div class="timer" id="timer-${order.id}">10:00</div>` : '';
+            
+            return `
+                <div class="order-card ${cardClass}" id="order-${order.id}" onclick="viewOrderDetails('${order.id}')">
+                    ${timerHtml}
+                    <div class="order-header">
+                        <div class="order-number">Заказ #${order.id.substring(0, 8)}</div>
+                        <div class="order-date">${date}</div>
+                    </div>
+                    <div class="order-status ${statusClass}">${statusText}</div>
+                    <div class="order-info">
+                        <div class="order-total">${formatPrice(order.total || 0)} ₽</div>
+                        <div>${itemsText}</div>
+                        ${itemsList}
+                    </div>
+                    ${deliveryInfo}
+                    ${actions}
+                </div>
+            `;
+        }
+
+        function startExpiryTimers(orders, type) {
+            orders.forEach(order => {
+                if (['pending_verification', 'pending_payment', 'rejected'].includes(order.status)) {
+                    startTimer(order.id, order.createdAt, type);
+                }
+            });
+        }
+
+        function startTimer(orderId, createdAt, type) {
+            const expiryTime = createdAt + EXPIRY_TIME;
+            const now = Date.now();
+            const remainingTime = Math.max(0, expiryTime - now);
+            
+            if (remainingTime <= 0) {
+                removeExpiredOrder(orderId, type);
+                return;
+            }
+            
+            timers[orderId] = setInterval(() => {
+                updateTimer(orderId, expiryTime, type);
+            }, 1000);
+            
+            updateTimer(orderId, expiryTime, type);
+        }
+
+        function updateTimer(orderId, expiryTime, type) {
+            const now = Date.now();
+            const remainingTime = Math.max(0, expiryTime - now);
+            
+            if (remainingTime <= 0) {
+                clearInterval(timers[orderId]);
+                delete timers[orderId];
+                removeExpiredOrder(orderId, type);
+                return;
+            }
+            
+            const minutes = Math.floor(remainingTime / 60000);
+            const seconds = Math.floor((remainingTime % 60000) / 1000);
+            const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            const timerElement = document.getElementById(`timer-${orderId}`);
+            if (timerElement) {
+                timerElement.textContent = formattedTime;
+                
+                const orderElement = document.getElementById(`order-${orderId}`);
+                if (orderElement) {
+                    if (remainingTime <= 60000) {
+                        timerElement.className = 'timer danger';
+                        orderElement.className = 'order-card expiring-soon';
+                    } else if (remainingTime <= 300000) {
+                        timerElement.className = 'timer warning';
+                        orderElement.className = 'order-card expiring';
+                    } else {
+                        timerElement.className = 'timer';
+                        orderElement.className = 'order-card';
+                    }
+                }
+            }
+        }
+
+        function removeExpiredOrder(orderId, type) {
+            const orderElement = document.getElementById(`order-${orderId}`);
+            if (orderElement) {
+                orderElement.style.opacity = '0.5';
+                orderElement.style.transform = 'scale(0.95)';
+                orderElement.style.transition = 'all 0.3s ease';
+                
+                setTimeout(() => {
+                    orderElement.remove();
+                    checkEmptyState(type);
+                }, 300);
+            }
+            
+            const user = auth.currentUser;
+            if (user) {
+                database.ref(`orders/${user.uid}/${orderId}`).remove();
+            }
+            
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const updatedOrders = orders.filter(order => order.id !== orderId);
+            localStorage.setItem('orders', JSON.stringify(updatedOrders));
+            
+            showNotification(`Заказ #${orderId.substring(0, 8)} удален`, 'warning');
+        }
+
+        function checkEmptyState(type) {
+            const listId = type === 'pending' ? 'pendingOrdersList' : 'rejectedOrdersList';
+            const list = document.getElementById(listId);
+            
+            if (list && list.children.length === 0) {
+                const emptyHtml = type === 'pending' ? `
+                    <div class="empty-state">
+                        <i class="fas fa-clock"></i>
+                        <h4>Нет заказов на проверке</h4>
+                        <p>Здесь появятся заказы, ожидающие проверки</p>
+                    </div>
+                ` : `
+                    <div class="empty-state">
+                        <i class="fas fa-times-circle"></i>
+                        <h4>Нет отклоненных заказов</h4>
+                        <p>Здесь появятся отклоненные заказы</p>
+                    </div>
+                `;
+                
+                list.innerHTML = emptyHtml;
+            }
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'pending_verification': return 'На проверке';
+                case 'pending_payment': return 'Ожидает оплаты';
+                case 'approved': return 'Одобрен';
+                case 'rejected': return 'Отклонен';
+                case 'delivered': return 'Доставлен';
+                case 'paid': return 'Оплачен';
+                default: return status;
+            }
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'pending_verification':
+                case 'pending_payment': return 'status-pending';
+                case 'approved':
+                case 'delivered':
+                case 'paid': return 'status-approved';
+                case 'rejected': return 'status-rejected';
+                default: return 'status-pending';
+            }
+        }
+
+        function formatPrice(price) {
+            if (price === undefined || price === null || isNaN(price)) {
+                return '0';
+            }
+            const numPrice = Number(price);
+            if (isNaN(numPrice)) return '0';
+            return numPrice.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        }
+
+        function viewOrderDetails(orderId) {
+            showNotification('Детали заказа будут показаны здесь', 'warning');
+        }
+
+        function trackOrder(orderId) {
+            showNotification('Отслеживание заказа будет доступно здесь', 'warning');
+        }
+        
+        function logout() {
+            if (confirm('Вы уверены, что хотите выйти?')) {
+                auth.signOut().then(() => {
+                    localStorage.removeItem('userName');
+                    localStorage.removeItem('userEmail');
+                    showLoginForm();
+                    document.getElementById('loginForm').reset();
+                }).catch((error) => {
+                    showNotification('Ошибка при выходе', 'error');
+                });
+            }
+        }
+        
+        function editProfile() {
+            const currentName = document.getElementById('userName').textContent;
+            const newName = prompt('Введите ваше имя:', currentName);
+            if (newName) {
+                const user = auth.currentUser;
+                if (user) {
+                    database.ref(`users/${user.uid}/name`).set(newName)
+                    .then(() => {
+                        document.getElementById('userName').textContent = newName;
+                        localStorage.setItem('userName', newName);
+                        showNotification('Имя обновлено', 'success');
+                    }).catch((error) => {
+                        showNotification('Ошибка обновления имени', 'error');
+                    });
+                }
+            }
+        }
+        
+        function changeLanguage(lang) {
+            localStorage.setItem('appLanguage', lang);
+            updateLanguage(lang);
+            showNotification('Язык изменен', 'success');
+        }
+        
+        function updateLanguage(lang) {
+            const ruButtons = document.querySelectorAll('.language-btn');
+            ruButtons.forEach(btn => {
+                if (btn.textContent === 'Русский') {
+                    btn.classList.toggle('active', lang === 'ru');
+                } else {
+                    btn.classList.toggle('active', lang === 'en');
+                }
+            });
+            
+            if (lang === 'en') {
+                document.querySelector('.page-title').innerHTML = '<i class="fas fa-user" style="color: var(--ozon-blue);"></i> Profile';
+                document.querySelector('.back-btn').innerHTML = '<i class="fas fa-arrow-left"></i> Main Page';
+                document.querySelector('.edit-profile-btn').textContent = 'Edit Profile';
+            }
+        }
+        
+        function openHelp() {
+            showNotification('Страница помощи в разработке', 'warning');
+        }
+        
+        function openAbout() {
+            showNotification('Basement v1.0.0\nКосметика премиум класса', 'success');
+        }
+
+        function goToRegister() {
+            window.location.href = 'login.html';
+        }
+
+        function sendPasswordReset() {
+            const email = document.getElementById('loginEmail').value;
+            
+            if (!email) {
+                showLoginMessage('Введите email для восстановления пароля', 'warning');
+                return;
+            }
+            
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    showLoginMessage('Инструкции по восстановлению пароля отправлены на ваш email', 'success');
+                })
+                .catch((error) => {
+                    console.error("Ошибка восстановления:", error);
+                    showLoginMessage('Ошибка отправки инструкций', 'error');
+                });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        window.addEventListener('beforeunload', function() {
+            Object.keys(timers).forEach(orderId => {
+                clearInterval(timers[orderId]);
+            });
+        });
+    </script>
+</body>
+</html>

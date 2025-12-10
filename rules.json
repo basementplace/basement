@@ -1,0 +1,51 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid",
+        ".validate": "newData.hasChildren(['username', 'email'])",
+        "username": {
+          ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 50"
+        },
+        "email": {
+          ".validate": "newData.isString() && newData.val().matches(/^[^@]+@[^@]+\\.[^@]+$/)"
+        },
+        "bio": {
+          ".validate": "newData.isString() && newData.val().length <= 200"
+        },
+        "phone": {
+          ".validate": "newData.isString() && newData.val().length <= 20"
+        },
+        "avatarBase64": {
+          ".validate": "newData.isString() && newData.val().length <= 500000"
+        },
+        "stats": {
+          "orders": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "favorites": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "reviews": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          }
+        },
+        "settings": {
+          "notifications": {
+            ".validate": "newData.isBoolean()"
+          },
+          "darkMode": {
+            ".validate": "newData.isBoolean()"
+          }
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "updatedAt": {
+          ".validate": "newData.isNumber()"
+        }
+      }
+    }
+  }
+}
